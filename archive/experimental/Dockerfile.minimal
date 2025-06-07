@@ -1,0 +1,35 @@
+FROM node:20-bullseye-slim
+
+# Install essential packages for Claude Code
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    ca-certificates \
+    openssh-client \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -m -s /bin/bash claude && \
+    echo "claude ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Install Claude Code globally as root
+RUN npm install -g @anthropic-ai/claude-code@latest
+
+# Switch to claude user
+USER claude
+WORKDIR /home/claude
+
+# Create necessary directories
+RUN mkdir -p /home/claude/.claude \
+    /home/claude/.anthropic \
+    /home/claude/workspace
+
+# Copy minimal entrypoint
+COPY --chown=claude:claude docker-entrypoint-minimal.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+WORKDIR /workspace
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["bash"]

@@ -1,0 +1,23 @@
+# Claude RC - Docker-only permissions (NO HOST ACCESS)
+# These settings only apply INSIDE the Docker container
+
+[docker_only]
+# Only allow operations within Docker container environment
+restrict_to_container = true
+no_host_access = true
+
+[tools]
+# Only basic container tools - NO system access
+Bash = { auto_approve = true, restrict_to = "container" }
+Write = { auto_approve = true, restrict_to = "container" }
+Edit = { auto_approve = true, restrict_to = "container" }
+Read = { auto_approve = true, restrict_to = "container" }
+Glob = { auto_approve = true, restrict_to = "container" }
+Grep = { auto_approve = true, restrict_to = "container" }
+LS = { auto_approve = true, restrict_to = "container" }
+
+# Explicitly DISABLED for host operations
+WebFetch = { auto_approve = false }
+MultiEdit = { auto_approve = false }
+NotebookRead = { auto_approve = false }
+NotebookEdit = { auto_approve = false }

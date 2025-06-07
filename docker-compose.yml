@@ -1,0 +1,60 @@
+# Docker Compose for Claude Code Automation
+version: '3.8'
+
+services:
+  claude-automation:
+    build: .
+    image: claude-automation:latest
+    container_name: claude-session
+    working_dir: /workspace
+    volumes:
+      - type: bind
+        source: ${PROJECT_PATH:-.}
+        target: /workspace
+      - type: bind
+        source: ${HOME}/.gitconfig
+        target: /home/claude/.gitconfig
+        read_only: true
+      # Persistent Claude configuration - critical for avoiding setup prompts
+      - type: volume
+        source: claude-code-config
+        target: /home/claude/.claude
+      # Optional: persistent command history
+      - type: volume
+        source: claude-code-history
+        target: /home/claude/.bash_history
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GIT_USER_NAME=${GIT_USER_NAME:-Claude Automation}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-claude@automation.local}
+      - CLAUDE_CONFIG_DIR=/home/claude/.claude
+      - NODE_OPTIONS=--max-old-space-size=4096
+    stdin_open: true
+    tty: true
+    networks:
+      - claude-network
+
+  # Optional: Web UI for monitoring
+  claude-web:
+    image: nginx:alpine
+    container_name: claude-web-ui
+    ports:
+      - "${WEB_PORT:-3456}:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+    networks:
+      - claude-network
+    profiles:
+      - web
+
+networks:
+  claude-network:
+    driver: bridge
+
+# Named volumes for persistent storage
+volumes:
+  claude-code-config:
+    driver: local
+  claude-code-history:
+    driver: local

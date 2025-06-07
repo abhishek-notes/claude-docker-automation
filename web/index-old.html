@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Docker Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        
+        .card p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .command {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+        }
+        
+        .terminal {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin: 20px 0;
+        }
+        
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27ca3f; }
+        
+        .terminal-content {
+            color: #00ff41;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐳 Claude Docker Automation</h1>
+            <p class="subtitle">Safe, Isolated, Autonomous AI Development</p>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>🚀 Quick Start</h2>
+                <p>Get started with Claude automation in Docker containers for safe, unlimited AI development.</p>
+                
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-btn red"></div>
+                        <div class="terminal-btn yellow"></div>
+                        <div class="terminal-btn green"></div>
+                    </div>
+                    <div class="terminal-content">
+                        $ ./claude-docker.sh start<br>
+                        🐳 Building Claude automation...<br>
+                        🚀 Starting session...<br>
+                        ✅ Claude working autonomously!
+                    </div>
+                </div>
+                
+                <a href="#" class="btn" onclick="copyCommand('./claude-docker.sh start')">Copy Command</a>
+            </div>
+            
+            <div class="card">
+                <h2>📊 System Status</h2>
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>Docker Environment: Ready</span>
+                </div>
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>Claude Code: Latest</span>
+                </div>
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>Permissions: --dangerously-skip-permissions</span>
+                </div>
+                <p>All systems operational. Claude can work with unlimited permissions safely within the Docker container.</p>
+            </div>
+            
+            <div class="card">
+                <h2>🛡️ Safety Features</h2>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🔒</div>
+                        <div>
+                            <strong>Container Isolation</strong><br>
+                            <small>Complete separation from host system</small>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔄</div>
+                        <div>
+                            <strong>Auto Git Branches</strong><br>
+                            <small>Automatic branch creation per session</small>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📝</div>
+                        <div>
+                            <strong>Progress Tracking</strong><br>
+                            <small>Real-time work documentation</small>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🚫</div>
+                        <div>
+                            <strong>No Permission Prompts</strong><br>
+                            <small>Fully autonomous operation</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>💻 Available Commands</h2>
+                <div class="command">./claude-docker.sh start [path] [hours]</div>
+                <p>Start a new autonomous coding session</p>
+                
+                <div class="command">./claude-docker.sh list</div>
+                <p>List all active Claude sessions</p>
+                
+                <div class="command">./claude-docker.sh attach</div>
+                <p>Attach to an existing session</p>
+                
+                <div class="command">./claude-docker.sh web</div>
+                <p>Start web monitoring interface</p>
+            </div>
+            
+            <div class="card">
+                <h2>🎯 Use Cases</h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin: 10px 0;">🏗️ <strong>Full Application Development</strong></li>
+                    <li style="margin: 10px 0;">🧪 <strong>Testing & Quality Assurance</strong></li>
+                    <li style="margin: 10px 0;">📚 <strong>Documentation Generation</strong></li>
+                    <li style="margin: 10px 0;">🔧 <strong>Code Refactoring & Optimization</strong></li>
+                    <li style="margin: 10px 0;">🐛 <strong>Bug Fixing & Debugging</strong></li>
+                    <li style="margin: 10px 0;">📦 <strong>Package & Library Creation</strong></li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h2>⚡ Performance</h2>
+                <p>Experience the full power of Claude without limitations:</p>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🚀</div>
+                        <div>
+                            <strong>No Interruptions</strong><br>
+                            <small>Zero permission prompts</small>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">⏱️</div>
+                        <div>
+                            <strong>Long Sessions</strong><br>
+                            <small>4-8+ hour autonomous work</small>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔄</div>
+                        <div>
+                            <strong>Parallel Sessions</strong><br>
+                            <small>Multiple projects simultaneously</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 50px;">
+            <p style="opacity: 0.8;">Built with ❤️ for autonomous AI development</p>
+            <p style="opacity: 0.6; margin-top: 10px;">Safe • Isolated • Powerful</p>
+        </div>
+    </div>
+    
+    <script>
+        function copyCommand(command) {
+            navigator.clipboard.writeText(command).then(() => {
+                alert('Command copied to clipboard!');
+            });
+        }
+        
+        // Update status dots with random intervals for demo
+        setInterval(() => {
+            const dots = document.querySelectorAll('.status-dot');
+            dots.forEach(dot => {
+                dot.style.animationDelay = Math.random() + 's';
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

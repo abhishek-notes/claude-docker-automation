@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Task Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .section h2 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .improved-task {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .improved-task h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        
+        .improved-task pre {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status-panel {
+            background: #f8f9fa;
+            border: 2px solid #6c757d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .status-running {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .status-success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .status-error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .log-output {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+        
+        .example-tasks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .example-task {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .example-task:hover {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Claude Task Launcher</h1>
+            <p>Create, improve, and launch automated Claude tasks</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Task Creation Section -->
+            <div class="section">
+                <h2>📝 Create Your Task</h2>
+                
+                <div class="form-group">
+                    <label for="projectPath">Project Path:</label>
+                    <input type="text" id="projectPath" placeholder="/Users/abhishek/Work/my-project" value="/Users/abhishek/Work/coin-flip-app">
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskType">Task Type:</label>
+                    <select id="taskType" onchange="updateTaskTemplate()">
+                        <option value="custom">Custom Task</option>
+                        <option value="webapp">Web Application</option>
+                        <option value="api">REST API</option>
+                        <option value="frontend">Frontend Component</option>
+                        <option value="refactor">Code Refactoring</option>
+                        <option value="testing">Add Tests</option>
+                        <option value="documentation">Documentation</option>
+                        <option value="bugfix">Bug Fix</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskDescription">Describe what you want Claude to build:</label>
+                    <textarea id="taskDescription" placeholder="I want to create a coin flip app with a nice UI that shows heads/tails animation..."></textarea>
+                </div>
+                
+                <div class="example-tasks">
+                    <div class="example-task" onclick="setExampleTask('webapp')">Web App Example</div>
+                    <div class="example-task" onclick="setExampleTask('api')">API Example</div>
+                    <div class="example-task" onclick="setExampleTask('component')">Component Example</div>
+                    <div class="example-task" onclick="setExampleTask('bugfix')">Bug Fix Example</div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="improveTask()">✨ Improve Task Instructions</button>
+                    <button class="btn btn-secondary" onclick="clearTask()">🗑️ Clear</button>
+                </div>
+            </div>
+            
+            <!-- Improved Task Display -->
+            <div class="section hidden" id="improvedTaskSection">
+                <h2>🎯 Improved Task Instructions</h2>
+                <div class="improved-task">
+                    <h3>Enhanced Task for Claude:</h3>
+                    <pre id="improvedTaskContent"></pre>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-success" onclick="launchAutomatedTask()">🚀 Launch Automated Task</button>
+                    <button class="btn btn-secondary" onclick="downloadTaskFile()">💾 Download Task File</button>
+                    <button class="btn btn-secondary" onclick="editImprovedTask()">✏️ Edit</button>
+                </div>
+            </div>
+            
+            <!-- Execution Status -->
+            <div class="section hidden" id="executionSection">
+                <h2>⚡ Task Execution</h2>
+                <div class="status-panel" id="statusPanel">
+                    <h3 id="statusTitle">🚀 Starting Automated Task...</h3>
+                    <p id="statusMessage">Initializing Claude automation...</p>
+                    <div class="log-output" id="logOutput"></div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-danger hidden" id="stopButton" onclick="stopExecution()">🛑 Stop Execution</button>
+                    <button class="btn" onclick="viewResults()">📊 View Results</button>
+                    <button class="btn btn-secondary" onclick="createNewTask()">🔄 New Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTask = '';
+        let executionProcess = null;
+        let currentSessionId = null;
+        
+        // Task templates
+        const taskTemplates = {
+            webapp: `Create a complete web application with:
+- Modern HTML/CSS/JavaScript
+- Responsive design
+- Interactive features
+- Clean code structure
+- README with setup instructions`,
+            
+            api: `Build a REST API with:
+- Express.js or similar framework
+- CRUD operations
+- Input validation
+- Error handling
+- API documentation
+- Tests`,
+            
+            frontend: `Create a frontend component with:
+- Modern framework (React/Vue/Vanilla JS)
+- Responsive design
+- Interactive functionality
+- Clean CSS styling
+- Reusable code structure`,
+            
+            refactor: `Refactor the existing code to:
+- Improve code structure
+- Add proper error handling
+- Optimize performance
+- Add documentation
+- Maintain functionality
+- Add tests if missing`,
+            
+            testing: `Add comprehensive tests:
+- Unit tests for core functions
+- Integration tests
+- Test coverage >80%
+- Mock external dependencies
+- CI/CD integration
+- Test documentation`,
+            
+            documentation: `Create comprehensive documentation:
+- README with setup instructions
+- API documentation
+- Code comments
+- Usage examples
+- Troubleshooting guide
+- Architecture overview`,
+            
+            bugfix: `Fix the reported bug:
+- Identify root cause
+- Implement proper fix
+- Add tests to prevent regression
+- Update documentation
+- Verify fix works
+- Clean up related code`
+        };
+        
+        // Example tasks
+        const exampleTasks = {
+            webapp: 'Create a coin flip app with animation, heads/tails tracking, and a reset button',
+            api: 'Build a todo list API with CRUD operations, user authentication, and data persistence',
+            component: 'Create a reusable date picker component with custom styling and validation',
+            bugfix: 'Fix the memory leak in the image carousel component that occurs after 10+ slides'
+        };
+        
+        function updateTaskTemplate() {
+            const taskType = document.getElementById('taskType').value;
+            if (taskType !== 'custom' && taskTemplates[taskType]) {
+                const current = document.getElementById('taskDescription').value;
+                if (!current.trim()) {
+                    document.getElementById('taskDescription').value = taskTemplates[taskType];
+                }
+            }
+        }
+        
+        function setExampleTask(type) {
+            document.getElementById('taskDescription').value = exampleTasks[type] || '';
+        }
+        
+        function clearTask() {
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('improvedTaskSection').classList.add('hidden');
+        }
+        
+        function improveTask() {
+            const description = document.getElementById('taskDescription').value.trim();
+            const projectPath = document.getElementById('projectPath').value.trim();
+            const taskType = document.getElementById('taskType').value;
+            
+            if (!description) {
+                alert('Please enter a task description');
+                return;
+            }
+            
+            if (!projectPath) {
+                alert('Please enter a project path');
+                return;
+            }
+            
+            // Simulate task improvement (in real implementation, this would call an AI service)
+            const improvedTask = generateImprovedTask(description, taskType, projectPath);
+            
+            document.getElementById('improvedTaskContent').textContent = improvedTask;
+            document.getElementById('improvedTaskSection').classList.remove('hidden');
+            
+            currentTask = improvedTask;
+        }
+        
+        function generateImprovedTask(description, type, projectPath) {
+            const projectName = projectPath.split('/').pop();
+            const timestamp = new Date().toISOString().slice(0, 19);
+            const sessionId = 'session-' + Date.now();
+            
+            return `# Claude Docker Automation Task - ${projectName}
+
+## Project Context
+- Repository: ${projectName}
+- Project Path: ${projectPath}
+- Session ID: ${sessionId}
+- Branch Strategy: Always create feature branches from main, never commit directly to main
+- Testing: All code must have tests with >80% coverage
+- Safety: Backup files before modification, track all changes
+- Created: ${timestamp}
+
+## Rules & Constraints (CRITICAL - Follow Strictly)
+- ⚠️ BACKUP before modifying any file (rename to .backup-TIMESTAMP)
+- 📝 Document all changes in CHANGELOG.md
+- 🚫 If breaking changes detected, create BREAKING_CHANGES.md and STOP
+- ✅ Run all tests after each change
+- 🌿 Always create feature branch: claude/session-${sessionId}
+- 📋 Create PR description with all changes listed
+- 🧪 Minimum 80% test coverage required
+- 📖 Include API documentation for new endpoints
+- 🔄 Commit frequently with meaningful messages
+
+## Safety Protocol
+- Create project backup before starting major changes
+- Stop immediately if breaking changes are detected
+- Document any blocking issues in ISSUES.md
+- Never force-push or rewrite git history
+- Verify all tests pass before declaring completion
+
+## Communication Protocol
+- Log progress every 30 minutes to logs/progress-$(date +%Y%m%d).log
+- If stuck for >15 minutes, document the issue and continue
+- Create summary report at completion in SUMMARY.md
+- Document any external tool usage in logs/llm-interactions.log
+
+## Today's Tasks
+
+### 1. Project Analysis & Setup
+- **Description**: Analyze existing project structure and prepare environment
+- **Requirements**: 
+  - Understand current architecture, dependencies, and patterns
+  - Create feature branch: claude/session-${sessionId}
+  - Set up logging and backup systems
+- **Acceptance Criteria**: Clear understanding of project and safe environment setup
+- **Time Estimate**: 30 minutes
+
+### 2. Main Implementation: ${description}
+- **Description**: ${description}
+- **Requirements**: 
+  - Follow existing code patterns and structure
+  - Write clean, maintainable code following project conventions
+  - Handle edge cases and errors appropriately
+  - Include comprehensive error handling
+  - Ensure cross-browser compatibility (if web application)
+  - Follow RESTful conventions (if API development)
+- **Acceptance Criteria**: Fully functional implementation meeting all requirements
+- **Time Estimate**: 2-3 hours
+
+### 3. Testing & Validation
+- **Description**: Create comprehensive test suite for new functionality
+- **Requirements**: 
+  - Unit tests for all new functions/methods (>80% coverage)
+  - Integration tests for API endpoints
+  - E2E tests for user workflows
+  - Edge case and error condition testing
+  - Performance validation
+- **Acceptance Criteria**: All features work correctly with no critical bugs
+- **Time Estimate**: 45 minutes
+
+### 4. Documentation & Git Workflow
+- **Description**: Document implementation and prepare for deployment
+- **Requirements**:
+  - Update README with new features/changes
+  - Add inline code comments for complex logic
+  - Document any new APIs or components
+  - Include usage examples
+  - Create meaningful git commits
+  - Update CHANGELOG.md with all changes
+- **Acceptance Criteria**: Clear documentation for future maintenance
+- **Time Estimate**: 30 minutes
+
+## Working Instructions
+1. 🔍 **Analysis Phase**: Understand project structure and requirements
+2. 🌿 **Branch Creation**: Create feature branch claude/session-${sessionId}
+3. 💾 **Backup Phase**: Create backups of files before modification
+4. 🛠️ **Implementation**: Work systematically through each task
+5. 🧪 **Testing**: Write tests as you build (>80% coverage)
+6. 📝 **Documentation**: Update docs and create PROGRESS.md
+7. 🔄 **Git Workflow**: Commit frequently with clear messages
+8. ✅ **Validation**: Run all tests and verify completion
+9. 📋 **Summary**: Create comprehensive SUMMARY.md
+
+## File Structure Requirements
+- logs/progress-$(date +%Y%m%d).log - Progress tracking
+- PROGRESS.md - Task completion status  
+- SUMMARY.md - Final completion report
+- ISSUES.md - Any blocking problems encountered
+- CHANGELOG.md - All changes documented
+- BREAKING_CHANGES.md - If breaking changes detected
+
+## Technical Requirements
+- [ ] Write clean, well-structured code following existing patterns
+- [ ] Follow existing project conventions and style
+- [ ] Add appropriate error handling and validation
+- [ ] Ensure responsive design (if UI components)
+- [ ] Use RESTful conventions (if API development)
+- [ ] Include request/response validation
+- [ ] Create meaningful git commits with clear messages
+- [ ] Test thoroughly before completion
+- [ ] Document all changes and new features
+
+## Git Configuration
+- Username: abhishek-notes
+- Email: abhisheksoni1551@gmail.com
+- Branch: claude/session-${sessionId}
+- Commit style: "feat/fix/docs: Clear description"
+
+## Deliverables
+- [ ] Working implementation of: ${description}
+- [ ] Comprehensive test suite (>80% coverage)
+- [ ] Updated documentation and README
+- [ ] PROGRESS.md with step-by-step progress
+- [ ] SUMMARY.md with final results and instructions
+- [ ] CHANGELOG.md with all changes documented
+- [ ] Git commits with clear, meaningful messages
+- [ ] Clean, maintainable code following project standards
+
+## Success Criteria
+The task is complete when:
+1. ${description} is fully implemented and working correctly
+2. All edge cases and error conditions are handled
+3. Code follows existing project patterns and conventions
+4. Comprehensive tests are written and passing (>80% coverage)
+5. Documentation is updated and complete
+6. No critical bugs remain
+7. All files are properly backed up before modification
+8. CHANGELOG.md reflects all changes made
+9. SUMMARY.md confirms successful completion with usage instructions
+
+## Emergency Protocols
+- If breaking changes detected: STOP, document in BREAKING_CHANGES.md
+- If tests fail: Fix immediately before continuing
+- If stuck >15 minutes: Document in ISSUES.md, try alternative approach
+- If external dependencies needed: Document requirements clearly
+
+## External Tool Access Guidelines
+- Can use package managers (npm, pip, yarn) for dependencies
+- Git operations for version control
+- Testing frameworks as needed
+- Documentation generators
+- Code formatters and linters
+- NO external network calls during development
+- Document all tool usage in logs/llm-interactions.log
+
+Start by analyzing the project structure and understanding the existing codebase, then implement the features systematically following these comprehensive guidelines.
+
+**Remember: Safety first, quality always, document everything!**`;
+        }
+        
+        function editImprovedTask() {
+            const improved = document.getElementById('improvedTaskContent').textContent;
+            document.getElementById('taskDescription').value = improved;
+            document.getElementById('improvedTaskSection').classList.add('hidden');
+        }
+        
+        function downloadTaskFile() {
+            const content = document.getElementById('improvedTaskContent').textContent;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'CLAUDE_TASKS.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        async function launchAutomatedTask() {
+            const projectPath = document.getElementById('projectPath').value.trim();
+            const taskContent = document.getElementById('improvedTaskContent').textContent;
+            
+            if (!projectPath) {
+                alert('Please enter a project path');
+                return;
+            }
+            
+            if (!taskContent) {
+                alert('Please improve the task first');
+                return;
+            }
+            
+            // Show execution section
+            document.getElementById('executionSection').classList.remove('hidden');
+            document.getElementById('statusPanel').className = 'status-panel status-running';
+            document.getElementById('stopButton').classList.remove('hidden');
+            
+            // Generate session ID
+            const sessionId = 'session-' + Date.now();
+            
+            try {
+                // Launch real task via API
+                const response = await fetch('/api/launch-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        projectPath: projectPath,
+                        taskContent: taskContent,
+                        sessionId: sessionId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Start monitoring the real session
+                    monitorRealSession(sessionId);
+                } else {
+                    throw new Error(result.error || 'Failed to launch task');
+                }
+                
+            } catch (error) {
+                console.error('Error launching task:', error);
+                document.getElementById('statusPanel').className = 'status-panel status-error';
+                document.getElementById('statusTitle').textContent = '❌ Launch Failed';
+                document.getElementById('statusMessage').textContent = 'Error: ' + error.message;
+                document.getElementById('stopButton').classList.add('hidden');
+            }
+        }
+        
+        // Monitor real session via API
+        async function monitorRealSession(sessionId) {
+            const logOutput = document.getElementById('logOutput');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            statusTitle.textContent = '🚀 Executing Automated Task';
+            statusMessage.textContent = `Running Claude automation...`;
+            
+            currentSessionId = sessionId;
+            
+            // Poll for session status and logs
+            const pollInterval = setInterval(async () => {
+                try {
+                    // Get session status
+                    const statusResponse = await fetch(`/api/session/${sessionId}/status`);
+                    const statusData = await statusResponse.json();
+                    
+                    // Get session logs
+                    const logsResponse = await fetch(`/api/session/${sessionId}/logs`);
+                    const logsData = await logsResponse.json();
+                    
+                    // Update UI based on status
+                    if (statusData.status === 'completed') {
+                        clearInterval(pollInterval);
+                        document.getElementById('statusPanel').className = 'status-panel status-success';
+                        statusTitle.textContent = '🎉 Task Completed Successfully!';
+                        statusMessage.textContent = 'Claude has completed all tasks. Check the project directory for results.';
+                        document.getElementById('stopButton').classList.add('hidden');
+                        
+                        // Load and display results
+                        loadSessionResults(sessionId);
+                        
+                    } else if (statusData.status === 'failed' || statusData.status === 'error') {
+                        clearInterval(pollInterval);
+                        document.getElementById('statusPanel').className = 'status-panel status-error';
+                        statusTitle.textContent = '❌ Task Failed';
+                        statusMessage.textContent = 'Task execution failed. Check logs for details.';
+                        document.getElementById('stopButton').classList.add('hidden');
+                        
+                    } else if (statusData.status === 'stopped') {
+                        clearInterval(pollInterval);
+                        document.getElementById('statusPanel').className = 'status-panel status-error';
+                        statusTitle.textContent = '🛑 Task Stopped';
+                        statusMessage.textContent = 'Task execution was stopped.';
+                        document.getElementById('stopButton').classList.add('hidden');
+                    }
+                    
+                    // Update logs
+                    if (logsData.logs && logsData.logs.length > 0) {
+                        logOutput.innerHTML = '';
+                        logsData.logs.forEach(log => {
+                            const timestamp = new Date(log.timestamp).toLocaleTimeString();
+                            const logLine = `[${timestamp}] ${log.message}`;
+                            logOutput.innerHTML += logLine + '\n';
+                        });
+                        logOutput.scrollTop = logOutput.scrollHeight;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error monitoring session:', error);
+                    clearInterval(pollInterval);
+                    document.getElementById('statusPanel').className = 'status-panel status-error';
+                    statusTitle.textContent = '❌ Monitoring Error';
+                    statusMessage.textContent = 'Lost connection to task execution.';
+                }
+            }, 2000); // Poll every 2 seconds
+            
+            executionProcess = pollInterval;
+        }
+        
+        // Load session results
+        async function loadSessionResults(sessionId) {
+            try {
+                const response = await fetch(`/api/session/${sessionId}/results`);
+                const results = await response.json();
+                
+                // Display results in a new section or update existing
+                const logOutput = document.getElementById('logOutput');
+                logOutput.innerHTML += '\n=== TASK RESULTS ===\n';
+                
+                if (results.files.SUMMARY) {
+                    logOutput.innerHTML += '\n📊 SUMMARY:\n' + results.files.SUMMARY + '\n';
+                }
+                
+                if (results.files.PROGRESS) {
+                    logOutput.innerHTML += '\n📝 PROGRESS:\n' + results.files.PROGRESS + '\n';
+                }
+                
+                if (results.files.ISSUES) {
+                    logOutput.innerHTML += '\n⚠️ ISSUES:\n' + results.files.ISSUES + '\n';
+                }
+                
+                logOutput.scrollTop = logOutput.scrollHeight;
+                
+            } catch (error) {
+                console.error('Error loading results:', error);
+            }
+        }
+        
+        async function stopExecution() {
+            if (currentSessionId) {
+                try {
+                    const response = await fetch(`/api/session/${currentSessionId}/stop`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    console.log('Stop result:', result);
+                    
+                } catch (error) {
+                    console.error('Error stopping session:', error);
+                }
+            }
+            
+            if (executionProcess) {
+                clearInterval(executionProcess);
+                executionProcess = null;
+            }
+            
+            document.getElementById('statusPanel').className = 'status-panel status-error';
+            document.getElementById('statusTitle').textContent = '🛑 Execution Stopped';
+            document.getElementById('statusMessage').textContent = 'Task execution was stopped by user.';
+            document.getElementById('stopButton').classList.add('hidden');
+        }
+        
+        function viewResults() {
+            const projectPath = document.getElementById('projectPath').value.trim();
+            alert(`Results should be available in: ${projectPath}\n\nCheck for:\n- PROGRESS.md\n- SUMMARY.md\n- New/modified code files\n- Git commits`);
+        }
+        
+        function createNewTask() {
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('projectPath').value = '/Users/abhishek/Work/';
+            document.getElementById('improvedTaskSection').classList.add('hidden');
+            document.getElementById('executionSection').classList.add('hidden');
+            currentTask = '';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default project path
+            const defaultPath = '/Users/abhishek/Work/coin-flip-app';
+            document.getElementById('projectPath').value = defaultPath;
+        });
+    </script>
+</body>
+</html>

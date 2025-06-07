@@ -1,0 +1,31 @@
+{
+  "name": "claude-task-automation",
+  "version": "1.0.0",
+  "description": "Web interface and API for Claude Code automation",
+  "main": "task-api.js",
+  "scripts": {
+    "start": "node task-api.js",
+    "dev": "nodemon task-api.js",
+    "install-deps": "npm install",
+    "setup": "npm install && chmod +x *.sh"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "claude",
+    "automation",
+    "docker",
+    "ai",
+    "tasks"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

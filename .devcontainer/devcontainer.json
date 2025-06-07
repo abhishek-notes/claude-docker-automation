@@ -1,0 +1,39 @@
+{
+  "name": "Claude Code Automation",
+  "dockerFile": "../Dockerfile.minimal",
+  "remoteUser": "claude",
+  "workspaceFolder": "/workspace",
+  
+  "mounts": [
+    "source=${localEnv:HOME}/.claude.json,target=/home/claude/.claude.json.readonly,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude,target=/home/claude/.claude-host,type=bind,readonly",
+    "source=${localEnv:HOME}/.gitconfig,target=/tmp/.gitconfig,type=bind,readonly"
+  ],
+  
+  "containerEnv": {
+    "GIT_USER_NAME": "${localEnv:GIT_USER_NAME:Claude Bot}",
+    "GIT_USER_EMAIL": "${localEnv:GIT_USER_EMAIL:claude@automation.local}",
+    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
+  },
+  
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "git.autofetch": true,
+        "git.defaultBranchName": "main"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  
+  "postCreateCommand": "git config --global --add safe.directory /workspace",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  }
+}

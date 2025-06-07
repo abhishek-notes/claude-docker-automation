@@ -1,0 +1,154 @@
+# Docker Compose for Claude Collaboration
+# This sets up two Claude instances that can collaborate through shared volumes
+version: '3.8'
+
+services:
+  # Backend Analyst - Alice
+  claude-alice:
+    build: .
+    image: claude-automation:latest
+    container_name: claude-alice-backend
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    volumes:
+      # Project directory
+      - type: bind
+        source: ${PROJECT_PATH:-.}
+        target: /workspace
+      # Shared collaboration directory
+      - type: volume
+        source: claude-collaboration
+        target: /collab
+      # Alice's private workspace
+      - type: volume
+        source: alice-workspace
+        target: /alice-private
+      # Git config
+      - type: bind
+        source: ${HOME}/.gitconfig
+        target: /home/claude/.gitconfig
+        read_only: true
+    environment:
+      - CLAUDE_ROLE=alice
+      - CLAUDE_SPECIALTY=backend
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GIT_USER_NAME=${GIT_USER_NAME:-Claude Alice}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-alice@claude.local}
+    networks:
+      - claude-network
+    command: |
+      bash -c '
+        echo "=== Claude Alice (Backend Analyst) ==="
+        echo "Collaboration directory: /collab"
+        echo "Private workspace: /alice-private"
+        echo ""
+        echo "To start Claude:"
+        echo "  claude --dangerously-skip-permissions"
+        echo ""
+        echo "Then paste the Alice prompt from: claude-manual-collab.sh prompts"
+        echo ""
+        bash
+      '
+
+  # Frontend Specialist - Bob  
+  claude-bob:
+    build: .
+    image: claude-automation:latest
+    container_name: claude-bob-frontend
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    volumes:
+      # Project directory
+      - type: bind
+        source: ${PROJECT_PATH:-.}
+        target: /workspace
+      # Shared collaboration directory
+      - type: volume
+        source: claude-collaboration
+        target: /collab
+      # Bob's private workspace
+      - type: volume
+        source: bob-workspace
+        target: /bob-private
+      # Git config
+      - type: bind
+        source: ${HOME}/.gitconfig
+        target: /home/claude/.gitconfig
+        read_only: true
+    environment:
+      - CLAUDE_ROLE=bob
+      - CLAUDE_SPECIALTY=frontend
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GIT_USER_NAME=${GIT_USER_NAME:-Claude Bob}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-bob@claude.local}
+    networks:
+      - claude-network
+    command: |
+      bash -c '
+        echo "=== Claude Bob (Frontend Specialist) ==="
+        echo "Collaboration directory: /collab"
+        echo "Private workspace: /bob-private"
+        echo ""
+        echo "To start Claude:"
+        echo "  claude --dangerously-skip-permissions"
+        echo ""
+        echo "Then paste the Bob prompt from: claude-manual-collab.sh prompts"
+        echo ""
+        bash
+      '
+
+  # Collaboration Monitor
+  collab-monitor:
+    image: busybox
+    container_name: claude-collab-monitor
+    volumes:
+      - type: volume
+        source: claude-collaboration
+        target: /collab
+        read_only: true
+    networks:
+      - claude-network
+    command: |
+      sh -c '
+        while true; do
+          clear
+          echo "=== Claude Collaboration Monitor ==="
+          echo "Time: $(date)"
+          echo ""
+          echo "=== Alice Activity ==="
+          if [ -f /collab/alice/findings.md ]; then
+            echo "Latest findings:"
+            tail -10 /collab/alice/findings.md
+          else
+            echo "No findings yet"
+          fi
+          echo ""
+          echo "=== Bob Activity ==="
+          if [ -f /collab/bob/findings.md ]; then
+            echo "Latest findings:"
+            tail -10 /collab/bob/findings.md
+          else
+            echo "No findings yet"
+          fi
+          echo ""
+          echo "=== Shared Files ==="
+          ls -la /collab/shared/ 2>/dev/null || echo "No shared files"
+          sleep 5
+        done
+      '
+    profiles:
+      - monitor
+
+networks:
+  claude-network:
+    driver: bridge
+
+volumes:
+  claude-collaboration:
+    driver: local
+  alice-workspace:
+    driver: local
+  bob-workspace:
+    driver: local
