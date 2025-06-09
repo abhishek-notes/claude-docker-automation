@@ -23,12 +23,15 @@ if [ ! -f "$PROJECT_PATH/$TASK_FILE" ]; then
     exit 1
 fi
 
-# Read the task content
+# Read the task content  
 TASK_CONTENT=$(cat "$PROJECT_PATH/$TASK_FILE")
 
 # Run pre-task safety check and create session
 log_event "INFO" "Starting Claude terminal launcher for: $PROJECT_PATH"
 SESSION_ID=$(pre_task_check "$PROJECT_PATH" "Terminal launcher task execution" | tail -n1)
+
+# Create backup of original task file
+cp "$PROJECT_PATH/$TASK_FILE" "$PROJECT_PATH/${TASK_FILE}.backup-${SESSION_ID}"
 
 # Create the full prompt (same as claude-direct-task.sh)
 FULL_PROMPT="You are Claude Code working in a Docker container. I need you to complete the tasks defined in $TASK_FILE.
@@ -61,9 +64,8 @@ You have full permissions in this container. Work autonomously until all tasks a
 
 Please start by analyzing the project structure and then begin working on the first task."
 
-# Save prompt to file to avoid AppleScript escaping issues
-PROMPT_FILE="/tmp/claude_prompt_${SESSION_ID}.txt"
-printf '%s' "$FULL_PROMPT" > "$PROMPT_FILE"
+# Write the full prompt directly to the task file so Docker can access it
+printf '%s' "$FULL_PROMPT" > "$PROJECT_PATH/$TASK_FILE"
 
 # Get the automation directory
 AUTOMATION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -71,6 +73,14 @@ AUTOMATION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Check if we need a new window or can use existing tab
 USE_NEW_TAB="${CLAUDE_USE_TABS:-true}"
 ITERM_PROFILE="${CLAUDE_ITERM_PROFILE:-Default}"
+PROJECT_NAME=$(basename "$PROJECT_PATH")
+
+# Visual test: Green emoji tab naming for claude-docker-automation 
+TAB_NAME="🟢 GREEN: claude-docker-automation"
+
+# Debug environment variables
+log_event "DEBUG" "Environment: CLAUDE_USE_TABS=$CLAUDE_USE_TABS, CLAUDE_ITERM_PROFILE=$ITERM_PROFILE"
+log_event "DEBUG" "Resolved: USE_NEW_TAB=$USE_NEW_TAB, TAB_NAME=$TAB_NAME"
 
 # Create AppleScript with proper variable substitution
 if [ "$USE_NEW_TAB" = "true" ]; then
@@ -84,50 +94,52 @@ tell application "iTerm"
     activate
     
     if $TAB_CONDITION and (count of windows) > 0 then
-        -- Use existing window, create new tab
+        -- Use existing window, create new tab with explicit profile
         tell current window
-            try
-                create tab with profile "$ITERM_PROFILE"
-            on error
-                create tab with default profile
-            end try
-            tell current session
-                -- Enable notifications and set tab name
-                set name to "Claude: $(basename '$PROJECT_PATH')"
+            set newTab to (create tab with profile "$ITERM_PROFILE")
+            tell current session of newTab
+                -- Set simple tab name
+                set name to "$TAB_NAME"
                 
-                write text "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
+                -- Set iTerm2 badge that persists even when Claude Code takes over
+                set badge to "$ITERM_PROFILE"
+                
+                -- Visual test: Green header output
+                write text "echo -e '\\033[0;32m==== 🟢 GREEN: CLAUDE DOCKER AUTOMATION ====\\033[0m'"
+                write text "echo -e '\\033[0;32mProject: $PROJECT_PATH\\033[0m'"
+                write text "echo -e '\\033[0;32mProfile: $ITERM_PROFILE\\033[0m'"
+                write text "echo -e '\\033[0;32m===========================================\\033[0m'"
+                write text "cd '$AUTOMATION_DIR' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
                 delay 15
-                write text "cat $PROMPT_FILE"
+                write text "cat $TASK_FILE"
                 delay 1
                 tell application "System Events"
                     key code 36
                 end tell
-                
-                -- Set up notification trigger  
-                write text "echo -e \"\\\\a\" && echo \"Claude session ready - press any key when you need attention\" && read -n 1"
             end tell
         end tell
     else
-        -- Create new window
-        try
-            create window with profile "$ITERM_PROFILE"
-        on error
-            create window with default profile
-        end try
-        tell current session of current window
-            -- Enable notifications and set tab name
-            set name to "Claude: $(basename '$PROJECT_PATH')"
+        -- Create new window with explicit profile
+        set newWindow to (create window with profile "$ITERM_PROFILE")
+        tell current session of newWindow
+            -- Set simple tab name
+            set name to "$TAB_NAME"
             
-            write text "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
+            -- Set iTerm2 badge that persists even when Claude Code takes over
+            set badge to "$ITERM_PROFILE"
+            
+            -- Visual test: Green header output
+            write text "echo -e '\\033[0;32m==== 🟢 GREEN: CLAUDE DOCKER AUTOMATION ====\\033[0m'"
+            write text "echo -e '\\033[0;32mProject: $PROJECT_PATH\\033[0m'"
+            write text "echo -e '\\033[0;32mProfile: $ITERM_PROFILE\\033[0m'"
+            write text "echo -e '\\033[0;32m===========================================\\033[0m'"
+            write text "cd '$AUTOMATION_DIR' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
             delay 15
-            write text "cat $PROMPT_FILE"
+            write text "cat $TASK_FILE"
             delay 1
             tell application "System Events"
                 key code 36
             end tell
-            
-            -- Set up notification trigger
-            write text "echo -e \"\\\\a\" && echo \"Claude session ready - press any key when you need attention\" && read -n 1"
         end tell
     end if
 end tell
@@ -136,13 +148,21 @@ EOF
 # Run the AppleScript
 osascript /tmp/claude_terminal_launcher.scpt
 
-# Clean up
-rm -f /tmp/claude_terminal_launcher.scpt "$PROMPT_FILE"
+# Clean up  
+rm -f /tmp/claude_terminal_launcher.scpt
+
+# Add cleanup trap to restore original task file on exit
+cleanup() {
+    if [ -f "$PROJECT_PATH/${TASK_FILE}.backup-${SESSION_ID}" ]; then
+        mv "$PROJECT_PATH/${TASK_FILE}.backup-${SESSION_ID}" "$PROJECT_PATH/$TASK_FILE"
+    fi
+}
+trap cleanup EXIT
 
 log_event "INFO" "Terminal launched successfully"
-echo "✅ iTerm launched with Claude automation"
-echo "📁 Project: $PROJECT_PATH"
-echo "📋 Task file: $TASK_FILE"
-echo "🆔 Session: $SESSION_ID"
-echo "📊 Safety features: Backup created, session tracked"
-echo "📝 Logs: $LOGS_DIR/safety-system.log"
+echo "iTerm launched with Claude automation"
+echo "Project: $PROJECT_PATH"
+echo "Task file: $TASK_FILE"
+echo "Session: $SESSION_ID"
+echo "Safety features: Backup created, session tracked"
+echo "Logs: $LOGS_DIR/safety-system.log"
