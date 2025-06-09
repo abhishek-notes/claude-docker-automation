@@ -30,7 +30,7 @@ app.get('/launcher', (req, res) => {
 // API endpoint to launch automated task
 app.post('/api/launch-task', async (req, res) => {
     try {
-        const { projectPath, taskContent, sessionId } = req.body;
+        const { projectPath, taskContent, sessionId, itermProfile, useDocker } = req.body;
         
         if (!projectPath || !taskContent) {
             return res.status(400).json({ 
@@ -52,7 +52,7 @@ app.post('/api/launch-task', async (req, res) => {
         await fs.writeFile(taskFilePath, taskContent);
         
         // Start the automated Claude session
-        const session = await launchClaudeSession(projectPath, sessionId);
+        const session = await launchClaudeSession(projectPath, sessionId, itermProfile, useDocker);
         
         // Store session
         activeSessions.set(sessionId, session);
@@ -171,8 +171,29 @@ app.get('/api/session/:sessionId/results', async (req, res) => {
     }
 });
 
+// Extract keywords from task content for container naming
+function extractKeywords(taskContent) {
+    const maxLength = 30;
+    
+    // Extract meaningful words from task content
+    const words = taskContent
+        .toLowerCase()
+        .replace(/[#*`_\[\]]/g, '') // Remove markdown
+        .match(/\b[a-z]{4,}\b/g) || [];
+    
+    // Filter out common words
+    const stopWords = ['task', 'create', 'build', 'make', 'update', 'file', 'code', 'test', 'with', 'that', 'this', 'from', 'have', 'will', 'should', 'must', 'need'];
+    const keywords = words
+        .filter(word => !stopWords.includes(word))
+        .slice(0, 3)
+        .join('-');
+    
+    // Ensure valid Docker name
+    return keywords.substring(0, maxLength).replace(/[^a-z0-9-]/g, '');
+}
+
 // Launch Claude session
-async function launchClaudeSession(projectPath, sessionId) {
+async function launchClaudeSession(projectPath, sessionId, itermProfile = 'Default', useDocker = false) {
     return new Promise((resolve, reject) => {
         const session = {
             sessionId: sessionId,
@@ -185,14 +206,36 @@ async function launchClaudeSession(projectPath, sessionId) {
             process: null
         };
         
-        // Launch terminal with Claude automation
-        const scriptPath = path.join(__dirname, 'claude-terminal-launcher.sh');
-        const childProcess = spawn(scriptPath, [projectPath, 'CLAUDE_TASKS.md'], {
-            cwd: __dirname,
-            env: { ...process.env },
-            stdio: ['pipe', 'pipe', 'pipe'],
-            detached: true
-        });
+        // Setup environment with iTerm profile
+        const sessionEnv = { 
+            ...process.env,
+            CLAUDE_USE_TABS: 'true',
+            CLAUDE_ITERM_PROFILE: itermProfile
+        };
+        
+        // Choose between Docker and tmux launch methods
+        let childProcess;
+        
+        if (useDocker) {
+            // Launch using Docker persistent container
+            const scriptPath = path.join(__dirname, 'claude-docker-persistent.sh');
+            childProcess = spawn(scriptPath, ['start', projectPath, 'CLAUDE_TASKS.md'], {
+                cwd: __dirname,
+                env: sessionEnv,
+                stdio: ['pipe', 'pipe', 'pipe'],
+                detached: true
+            });
+        } else {
+            // Launch tmux session with Claude automation using persistence wrapper
+            const wrapperPath = path.join(__dirname, 'claude-session-wrapper.sh');
+            const scriptPath = path.join(__dirname, 'claude-tmux-launcher.sh');
+            childProcess = spawn(wrapperPath, [scriptPath, projectPath, 'CLAUDE_TASKS.md'], {
+                cwd: __dirname,
+                env: sessionEnv,
+                stdio: ['pipe', 'pipe', 'pipe'],
+                detached: true
+            });
+        }
         
         session.process = childProcess;
         
@@ -220,13 +263,22 @@ async function launchClaudeSession(projectPath, sessionId) {
         
         // Handle process completion
         childProcess.on('close', (code) => {
-            session.status = 'terminal_launched';
+            if (useDocker) {
+                session.status = 'docker_container_created';
+                session.logs.push({
+                    type: 'system',
+                    message: `Docker container created successfully. Container is persistent and won't auto-start.`,
+                    timestamp: new Date().toISOString()
+                });
+            } else {
+                session.status = 'terminal_launched';
+                session.logs.push({
+                    type: 'system',
+                    message: `Terminal launched successfully. Claude is running in Terminal.app`,
+                    timestamp: new Date().toISOString()
+                });
+            }
             session.endTime = new Date().toISOString();
-            session.logs.push({
-                type: 'system',
-                message: `Terminal launched successfully. Claude is running in Terminal.app`,
-                timestamp: new Date().toISOString()
-            });
         });
         
         // Handle process errors
