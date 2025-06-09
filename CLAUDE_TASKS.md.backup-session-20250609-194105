@@ -1,0 +1,7 @@
+# Visual Test: Automation
+
+Testing green emoji visual identification.
+
+## Check
+1. Tab should show: 🟢 GREEN: claude-docker-automation
+2. Terminal should show green header

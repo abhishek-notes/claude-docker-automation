@@ -79,3 +79,5 @@ claude-logs/
 # Docker volumes data
 docker-data/
 docker-volumes/
+# GitHub token file
+.env.github

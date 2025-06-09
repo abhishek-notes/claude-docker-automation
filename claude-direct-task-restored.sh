@@ -141,12 +141,7 @@ Please start by analyzing the project structure and then begin working on the fi
     echo -e "${GREEN}Starting Claude now...${NC}"
     echo ""
     
-    # Start Claude with clean environment (lightweight persistence)
-    echo "📝 Starting conversation persistence..."
-    
-    # Disable automatic notification monitoring (was causing false positives)
-    # User can manually trigger notifications if needed
-    
+    # Start Claude with clean environment
     docker run -it --rm \
         --name "$container_name" \
         "${env_vars[@]}" \
@@ -190,12 +185,6 @@ Please start by analyzing the project structure and then begin working on the fi
     
     echo ""
     log "Session completed: $container_name"
-    
-    # Clean up notification monitoring
-    if [ -f "/tmp/claude-notification-monitor-$container_name.pid" ]; then
-        kill $(cat "/tmp/claude-notification-monitor-$container_name.pid") 2>/dev/null || true
-        rm -f "/tmp/claude-notification-monitor-$container_name.pid"
-    fi
     show_session_results "$project_path"
 }
 

@@ -1,0 +1,7 @@
+# Visual Test: Work
+
+Testing blue emoji visual identification.
+
+## Check
+1. Tab should show: 🔵 BLUE: claude-docker-automation
+2. Terminal should show blue header

@@ -75,8 +75,8 @@ USE_NEW_TAB="${CLAUDE_USE_TABS:-true}"
 ITERM_PROFILE="${CLAUDE_ITERM_PROFILE:-Default}"
 PROJECT_NAME=$(basename "$PROJECT_PATH")
 
-# Visual test: Green emoji tab naming for claude-docker-automation 
-TAB_NAME="🟢 GREEN: claude-docker-automation"
+# Simple tab naming
+TAB_NAME="Claude: $PROJECT_NAME [$ITERM_PROFILE]"
 
 # Debug environment variables
 log_event "DEBUG" "Environment: CLAUDE_USE_TABS=$CLAUDE_USE_TABS, CLAUDE_ITERM_PROFILE=$ITERM_PROFILE"
@@ -104,12 +104,7 @@ tell application "iTerm"
                 -- Set iTerm2 badge that persists even when Claude Code takes over
                 set badge to "$ITERM_PROFILE"
                 
-                -- Visual test: Green header output
-                write text "echo -e '\\033[0;32m==== 🟢 GREEN: CLAUDE DOCKER AUTOMATION ====\\033[0m'"
-                write text "echo -e '\\033[0;32mProject: $PROJECT_PATH\\033[0m'"
-                write text "echo -e '\\033[0;32mProfile: $ITERM_PROFILE\\033[0m'"
-                write text "echo -e '\\033[0;32m===========================================\\033[0m'"
-                write text "cd '$AUTOMATION_DIR' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
+                write text "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
                 delay 15
                 write text "cat $TASK_FILE"
                 delay 1
@@ -128,12 +123,7 @@ tell application "iTerm"
             -- Set iTerm2 badge that persists even when Claude Code takes over
             set badge to "$ITERM_PROFILE"
             
-            -- Visual test: Green header output
-            write text "echo -e '\\033[0;32m==== 🟢 GREEN: CLAUDE DOCKER AUTOMATION ====\\033[0m'"
-            write text "echo -e '\\033[0;32mProject: $PROJECT_PATH\\033[0m'"
-            write text "echo -e '\\033[0;32mProfile: $ITERM_PROFILE\\033[0m'"
-            write text "echo -e '\\033[0;32m===========================================\\033[0m'"
-            write text "cd '$AUTOMATION_DIR' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
+            write text "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
             delay 15
             write text "cat $TASK_FILE"
             delay 1

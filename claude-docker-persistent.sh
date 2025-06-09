@@ -94,8 +94,8 @@ create_project_volume() {
     local volume_name="claude-project-${project_name}"
     
     if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
-        log "Creating project volume: $volume_name"
-        docker volume create "$volume_name"
+        log "Creating project volume: $volume_name" >&2
+        docker volume create "$volume_name" >/dev/null 2>&1
     fi
     
     echo "$volume_name"
@@ -299,7 +299,8 @@ AUTO_TASK_EOF
     sleep 3
     
     # Check container status
-    if docker ps | grep -q "$container_name"; then
+    log "Checking if container '$container_name' is running..."
+    if docker ps --filter "name=^${container_name}$" --format "{{.Names}}" | grep -q "^${container_name}$"; then
         echo ""
         log "✅ Persistent container created successfully!"
         echo ""
@@ -325,6 +326,9 @@ AUTO_TASK_EOF
         
         # Save container info for later reference
         echo "$container_name" > "$HOME/.claude-last-container"
+        
+        # Auto-launch terminal to connect to the container
+        launch_terminal_connection "$container_name" "$automated_prompt"
         
     else
         echo -e "${RED}Error:${NC} Container failed to start"
@@ -364,6 +368,102 @@ attach_last() {
         fi
     else
         echo -e "${RED}Error:${NC} No recent container found"
+    fi
+}
+
+# Launch terminal connection to container
+launch_terminal_connection() {
+    local container_name="$1"
+    local automated_prompt="$2"
+    
+    log "🖥️ Launching terminal connection to container..."
+    
+    # Get iTerm profile from environment or use default
+    local iterm_profile="${CLAUDE_ITERM_PROFILE:-Default}"
+    
+    # Create a command that will connect to the container and start Claude
+    local connect_command="docker exec -it '$container_name' bash -c \"cd /workspace && claude --dangerously-skip-permissions\""
+    
+    # Launch iTerm with the connection command
+    if command -v osascript >/dev/null 2>&1; then
+        log "🖥️ Launching iTerm terminal..."
+        # Write the task content to a temp file for auto-injection
+        local task_temp_file="/tmp/claude-task-${container_name}.txt"
+        echo "$automated_prompt" > "$task_temp_file"
+        
+        # Create a temporary script file to avoid quoting issues
+        local temp_script="/tmp/claude-connect-${container_name}.applescript"
+        cat > "$temp_script" << APPLESCRIPT_EOF
+tell application "iTerm"
+    activate
+    set newWindow to (create window with profile "$iterm_profile")
+    tell current session of newWindow
+        write text "echo '🐳 Connecting to Docker container: $container_name'"
+        write text "echo '🚀 Starting Claude Code...'"
+        write text "echo '💫 Task will be automatically injected in 10 seconds...'"
+        write text "echo ''"
+        write text "docker exec -it '$container_name' bash -c \"cd /workspace && claude --dangerously-skip-permissions\""
+    end tell
+end tell
+APPLESCRIPT_EOF
+        
+        # Execute the AppleScript
+        if osascript "$temp_script" 2>/dev/null; then
+            log "✅ iTerm window created successfully"
+        else
+            log "⚠️  Failed to create iTerm window via AppleScript"
+        fi
+        rm -f "$temp_script"
+        
+        # Set up background task to auto-inject the task after 10 seconds
+        {
+            sleep 10  # Wait 10 seconds for Claude Code to initialize
+            
+            log "🤖 Auto-injecting task into Claude..."
+            
+            # Check if task file still exists
+            if [ ! -f "$task_temp_file" ]; then
+                log "⚠️  Task file not found, skipping auto-injection"
+                return
+            fi
+            
+            # Create AppleScript to paste the task content and press enter
+            local paste_script="/tmp/claude-paste-${container_name}.applescript"
+            
+            # Read the task content and escape it for AppleScript
+            local task_content=$(cat "$task_temp_file" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+            
+            cat > "$paste_script" << PASTE_EOF
+tell application "iTerm"
+    activate
+    tell current session of current window
+        write text "$task_content"
+        delay 0.5
+        write text ""
+    end tell
+end tell
+PASTE_EOF
+            
+            # Execute the paste script
+            if osascript "$paste_script" 2>/dev/null; then
+                log "✅ Task automatically injected into Claude!"
+            else
+                log "⚠️  Failed to inject task via AppleScript"
+            fi
+            
+            # Clean up temp files
+            rm -f "$paste_script" "$task_temp_file"
+            
+        } &  # Run in background
+        
+        log "✅ Terminal launched with profile: $iterm_profile"
+    else
+        # Fallback: just run the command
+        echo "🔧 Running connection command directly..."
+        echo "🐳 Connecting to Docker container: $container_name"
+        echo "🚀 Starting Claude Code..."
+        echo ""
+        eval "$connect_command"
     fi
 }
 
