@@ -1,10 +1,10 @@
 # Claude Autonomous Task - 
 
 ## Project Overview
-- **Goal**: Help me solve my issue in this chat file in work directory: extracted (2).txt and extracted (3).txt -- i am super frustrated now, just get it done, no matter what tests you write etc. -- do it in iterm
+- **Goal**: Respond with hello mister only, do nothing else at all
 - **Type**: Custom Development
-- **Project Path**: /Users/abhishek/Work/
-- **Created**: 2025-06-09T10:07:59
+- **Project Path**: /Users/abhishek/work/
+- **Created**: 2025-06-09T21:11:27
 
 ## Tasks
 
@@ -14,7 +14,7 @@
 - **Acceptance Criteria**: Clear understanding of project layout and tech stack
 
 ### 2. Implementation
-- **Description**: Help me solve my issue in this chat file in work directory: extracted (2).txt and extracted (3).txt -- i am super frustrated now, just get it done, no matter what tests you write etc. -- do it in iterm
+- **Description**: Respond with hello mister only, do nothing else at all
 - **Requirements**: 
   - Follow existing code patterns and structure
   - Ensure cross-browser compatibility
@@ -49,7 +49,7 @@
 - [ ] Test thoroughly before completion
 
 ## Deliverables
-- [ ] Working implementation of: Help me solve my issue in this chat file in work directory: extracted (2).txt and extracted (3).txt -- i am super frustrated now, just get it done, no matter what tests you write etc. -- do it in iterm
+- [ ] Working implementation of: Respond with hello mister only, do nothing else at all
 - [ ] Updated documentation
 - [ ] PROGRESS.md with step-by-step progress
 - [ ] SUMMARY.md with final results and instructions
@@ -57,7 +57,7 @@
 
 ## Success Criteria
 The task is complete when:
-1. Help me solve my issue in this chat file in work directory: extracted (2).txt and extracted (3).txt -- i am super frustrated now, just get it done, no matter what tests you write etc. -- do it in iterm is fully implemented and working
+1. Respond with hello mister only, do nothing else at all is fully implemented and working
 2. All edge cases are handled
 3. Code is clean and well-documented
 4. No critical bugs remain
