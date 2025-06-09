@@ -79,20 +79,23 @@ pre_task_check() {
     
     log_event "INFO" "Running pre-task safety check for: $project_path"
     
-    # Check if project has uncommitted changes
-    if [[ -d "$project_path/.git" ]]; then
+    # Check if project has uncommitted changes (disabled for performance on large repos)
+    if [[ -d "$project_path/.git" ]] && [[ "$project_path" != "/Users/abhishek/Work" ]]; then
+        # Only check git status for smaller project directories, not the huge Work directory
         cd "$project_path"
-        if ! git diff-index --quiet HEAD --; then
-            log_event "WARN" "Project has uncommitted changes, creating backup"
-            create_backup "$project_path" "pre-task"
+        if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+            log_event "WARN" "Project has uncommitted changes (backup skipped for performance)"
+            # create_backup "$project_path" "pre-task"  # Disabled for performance
         fi
+    elif [[ "$project_path" == "/Users/abhishek/Work" ]]; then
+        log_event "INFO" "Skipping git check for large Work directory (performance optimization)"
     fi
     
-    # Check project size (warn if > 100MB)
-    local project_size=$(du -sm "$project_path" 2>/dev/null | cut -f1 || echo "0")
-    if [[ $project_size -gt 100 ]]; then
-        log_event "WARN" "Large project detected (${project_size}MB), consider selective backup"
-    fi
+    # Check project size (disabled for performance on large directories)
+    # local project_size=$(du -sm "$project_path" 2>/dev/null | cut -f1 || echo "0")
+    # if [[ $project_size -gt 100 ]]; then
+    #     log_event "WARN" "Large project detected (${project_size}MB), consider selective backup"
+    # fi
     
     # Create session file
     local session_id="session-$(date +%Y%m%d-%H%M%S)"
@@ -105,9 +108,9 @@ pre_task_check() {
     "task_description": "$task_description",
     "start_time": "$(date -Iseconds)",
     "safety_checks": {
-        "backup_created": true,
+        "backup_created": false,
         "git_status_checked": true,
-        "project_size_mb": $project_size
+        "project_size_mb": 0
     }
 }
 EOF

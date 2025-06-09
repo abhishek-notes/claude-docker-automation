@@ -28,7 +28,7 @@ TASK_CONTENT=$(cat "$PROJECT_PATH/$TASK_FILE")
 
 # Run pre-task safety check and create session
 log_event "INFO" "Starting Claude terminal launcher for: $PROJECT_PATH"
-SESSION_ID=$(pre_task_check "$PROJECT_PATH" "Terminal launcher task execution")
+SESSION_ID=$(pre_task_check "$PROJECT_PATH" "Terminal launcher task execution" | tail -n1)
 
 # Create the full prompt (same as claude-direct-task.sh)
 FULL_PROMPT="You are Claude Code working in a Docker container. I need you to complete the tasks defined in $TASK_FILE.
@@ -61,23 +61,75 @@ You have full permissions in this container. Work autonomously until all tasks a
 
 Please start by analyzing the project structure and then begin working on the first task."
 
-# Escape the prompt for AppleScript
-ESCAPED_PROMPT=$(printf '%s\n' "$FULL_PROMPT" | sed 's/\\/\\\\/g; s/"/\\"/g')
+# Save prompt to file to avoid AppleScript escaping issues
+PROMPT_FILE="/tmp/claude_prompt_${SESSION_ID}.txt"
+printf '%s' "$FULL_PROMPT" > "$PROMPT_FILE"
 
 # Get the automation directory
 AUTOMATION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Create AppleScript to open Terminal and run Claude
+# Check if we need a new window or can use existing tab
+USE_NEW_TAB="${CLAUDE_USE_TABS:-true}"
+ITERM_PROFILE="${CLAUDE_ITERM_PROFILE:-Default}"
+
+# Create AppleScript with proper variable substitution
+if [ "$USE_NEW_TAB" = "true" ]; then
+    TAB_CONDITION="true"
+else
+    TAB_CONDITION="false"
+fi
+
 cat > /tmp/claude_terminal_launcher.scpt << EOF
-tell application "Terminal"
+tell application "iTerm"
     activate
-    do script "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
-    delay 5
-    do script "$ESCAPED_PROMPT" in front window
-    delay 1
-    tell application "System Events"
-        key code 36
-    end tell
+    
+    if $TAB_CONDITION and (count of windows) > 0 then
+        -- Use existing window, create new tab
+        tell current window
+            try
+                create tab with profile "$ITERM_PROFILE"
+            on error
+                create tab with default profile
+            end try
+            tell current session
+                -- Enable notifications and set tab name
+                set name to "Claude: $(basename '$PROJECT_PATH')"
+                
+                write text "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
+                delay 15
+                write text "cat $PROMPT_FILE"
+                delay 1
+                tell application "System Events"
+                    key code 36
+                end tell
+                
+                -- Set up notification trigger  
+                write text "echo -e \"\\\\a\" && echo \"Claude session ready - press any key when you need attention\" && read -n 1"
+            end tell
+        end tell
+    else
+        -- Create new window
+        try
+            create window with profile "$ITERM_PROFILE"
+        on error
+            create window with default profile
+        end try
+        tell current session of current window
+            -- Enable notifications and set tab name
+            set name to "Claude: $(basename '$PROJECT_PATH')"
+            
+            write text "cd '$AUTOMATION_DIR' && echo 'Starting Claude automation session...' && echo 'Project: $PROJECT_PATH' && echo 'Session ID: $SESSION_ID' && echo '' && ./claude-direct-task.sh '$PROJECT_PATH' '$TASK_FILE'"
+            delay 15
+            write text "cat $PROMPT_FILE"
+            delay 1
+            tell application "System Events"
+                key code 36
+            end tell
+            
+            -- Set up notification trigger
+            write text "echo -e \"\\\\a\" && echo \"Claude session ready - press any key when you need attention\" && read -n 1"
+        end tell
+    end if
 end tell
 EOF
 
@@ -85,10 +137,10 @@ EOF
 osascript /tmp/claude_terminal_launcher.scpt
 
 # Clean up
-rm -f /tmp/claude_terminal_launcher.scpt
+rm -f /tmp/claude_terminal_launcher.scpt "$PROMPT_FILE"
 
 log_event "INFO" "Terminal launched successfully"
-echo "✅ Terminal launched with Claude automation"
+echo "✅ iTerm launched with Claude automation"
 echo "📁 Project: $PROJECT_PATH"
 echo "📋 Task file: $TASK_FILE"
 echo "🆔 Session: $SESSION_ID"

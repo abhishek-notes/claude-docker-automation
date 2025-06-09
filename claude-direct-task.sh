@@ -28,7 +28,7 @@ check_task_file() {
         echo -e "${RED}Error:${NC} Task file not found: $full_path"
         echo ""
         echo "Please create $task_file with your tasks, or run:"
-        echo "  ./claude-official.sh start $project_path  # For manual session"
+        echo "  ./claude-official-restored.sh start $project_path  # For manual session"
         exit 1
     fi
     
@@ -141,7 +141,32 @@ Please start by analyzing the project structure and then begin working on the fi
     echo -e "${GREEN}Starting Claude now...${NC}"
     echo ""
     
-    # Start Claude with clean environment
+    # Start Claude with clean environment (lightweight persistence)
+    echo "📝 Starting conversation persistence..."
+    
+    # Start notification monitoring in background
+    (
+        # Wait for container to start
+        while ! docker ps --format "{{.Names}}" | grep -q "^$container_name$"; do
+            sleep 1
+        done
+        
+        echo "🔔 Starting notification monitoring for $container_name..."
+        sleep 30  # Wait for Claude to initialize
+        
+        while docker ps --format "{{.Names}}" | grep -q "^$container_name$"; do
+            # Check if Claude might be waiting (simple heuristic)
+            if docker exec "$container_name" sh -c 'ps aux | grep -v grep | grep -q "read\|input\|waiting"' 2>/dev/null; then
+                ./claude-notification-trigger.sh "Claude session may need attention" "$(basename "$project_path")" "$project_path" 2>/dev/null || true
+                sleep 300  # Don't spam - wait 5 minutes before checking again
+            fi
+            sleep 30
+        done
+    ) &
+    
+    # Store background job PID for cleanup
+    echo $! > /tmp/claude-notification-monitor-$container_name.pid
+    
     docker run -it --rm \
         --name "$container_name" \
         "${env_vars[@]}" \
@@ -185,6 +210,12 @@ Please start by analyzing the project structure and then begin working on the fi
     
     echo ""
     log "Session completed: $container_name"
+    
+    # Clean up notification monitoring
+    if [ -f "/tmp/claude-notification-monitor-$container_name.pid" ]; then
+        kill $(cat "/tmp/claude-notification-monitor-$container_name.pid") 2>/dev/null || true
+        rm -f "/tmp/claude-notification-monitor-$container_name.pid"
+    fi
     show_session_results "$project_path"
 }
 
