@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Claude Docker Persistent Task Runner
-# Creates persistent Docker containers with proper naming and restart policies
+# Claude Docker Ephemeral Task Runner  
+# Creates secure, auto-removing Docker containers for Claude Code execution
 set -euo pipefail
 
 # Source safety system for consistent logging
@@ -176,7 +176,7 @@ COMPLETION CRITERIA:
 
 AUTONOMOUS MODE: Work completely independently. Don't ask for confirmation or input. Just complete the tasks and document your progress.
 
-NOTE: This is a persistent container. Your work and conversation will be preserved even after container restarts.
+NOTE: This is an ephemeral container for security isolation. Your work files are preserved on the host filesystem, but the container will auto-remove when you exit.
 
 BEGIN AUTONOMOUS WORK NOW!"
 
@@ -216,22 +216,22 @@ BEGIN AUTONOMOUS WORK NOW!"
     )
     
     echo ""
-    echo -e "${BLUE}🐳 PERSISTENT DOCKER MODE${NC}"
+    echo -e "${BLUE}🐳 SECURE DOCKER MODE${NC}"
     echo -e "${BLUE}═══════════════════════════${NC}"
-    echo -e "${YELLOW}• Container will persist after exit${NC}"
-    echo -e "${YELLOW}• Restart policy: no (preserved but won't auto-start)${NC}"
-    echo -e "${YELLOW}• Conversation history preserved${NC}"
-    echo -e "${YELLOW}• Named volumes for data persistence${NC}"
+    echo -e "${YELLOW}• Container will auto-remove after exit${NC}"
+    echo -e "${YELLOW}• Secure isolation during execution${NC}"
+    echo -e "${YELLOW}• Work files preserved on host filesystem${NC}"
+    echo -e "${YELLOW}• No container clutter after completion${NC}"
     echo ""
-    echo -e "${GREEN}Starting persistent container...${NC}"
+    echo -e "${GREEN}Starting ephemeral container...${NC}"
     echo ""
     
-    # Start container with persistence settings
-    # Note: NOT using --rm flag ensures container is preserved after exit
-    # restart=no means it won't auto-start on Docker startup (but still preserved)
+    # Start container with auto-removal settings
+    # Note: Using --rm flag ensures container is automatically removed after exit
+    # This provides security isolation without persistent container clutter
     docker run -d \
         --name "$container_name" \
-        --restart no \
+        --rm \
         "${env_vars[@]}" \
         "${volumes[@]}" \
         "${labels[@]}" \
@@ -324,10 +324,10 @@ AUTO_TASK_EOF
         echo -e "${BLUE}📋 Management Commands:${NC}"
         echo "  View logs: docker logs $container_name"
         echo "  Stop: docker stop $container_name"
-        echo "  Restart: docker restart $container_name"
+        echo "  Monitor: docker logs -f $container_name"
         echo "  Remove: docker rm -f $container_name"
         echo ""
-        echo -e "${GREEN}💡 TIP:${NC} The container will persist across Docker restarts!"
+        echo -e "${GREEN}💡 TIP:${NC} The container provides secure isolation and auto-cleans up!"
         
         # Save container info for later reference
         echo "$container_name" > "$HOME/.claude-last-container"
@@ -547,7 +547,7 @@ FEATURES:
     • Restart policy: no (won't auto-start)
     • Conversation history preserved
     • Project-specific volumes
-    • Survives Docker restarts
+    • Auto-removes after completion
 
 EXAMPLES:
     ./claude-docker-persistent.sh start                    # Current directory
