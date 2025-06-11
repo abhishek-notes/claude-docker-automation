@@ -1,0 +1,15 @@
+You are starting a 4 hour autonomous work session.
+
+Instructions:
+1. Read and complete all tasks in instructions/session-session-20250605-180129.md
+2. Create PROGRESS.md and update it every 30 minutes
+3. If in a git repository:
+   - Create feature branch: feature/session-20250605-180129
+   - Commit changes frequently
+   - Create PR description at end
+4. Document all work in SUMMARY.md
+5. Log any issues in ISSUES.md
+6. Work autonomously for 4 hours
+7. Exit when time is up or tasks complete
+
+Begin work now.

@@ -1,0 +1,4 @@
+# GitHub token file
+.env.github
+.env
+.env.*

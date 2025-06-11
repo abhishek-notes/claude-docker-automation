@@ -1,0 +1,44 @@
+# Project Config - Maximum Permissions
+
+[workspace]
+root = "."
+trust_all_operations = true
+
+[permissions]
+mode = "permissive"
+auto_approve = true
+skip_confirmation = true
+disable_all_prompts = true
+
+# Approve ALL patterns
+allowed_commands = ["*"]
+allowed_paths = ["*"]
+allowed_domains = ["*"]
+
+# Tool-specific permissions
+[permissions.bash]
+auto_approve = true
+patterns = ["*", "**/*"]
+commands = ["*"]
+
+[permissions.file]
+auto_approve = true
+operations = ["*"]
+paths = ["*"]
+
+[permissions.network]
+auto_approve = true
+domains = ["*"]
+
+[automation]
+skip_file_confirmations = true
+skip_command_confirmations = true
+skip_fetch_confirmations = true
+skip_all_confirmations = true
+
+# Whitelist everything
+[whitelist]
+commands = ["*"]
+paths = ["*"]
+domains = ["*"]
+tools = ["*"]

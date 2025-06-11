@@ -1,0 +1,12 @@
+# Claude RC - Auto-approve everything
+auto_approve = true
+skip_confirmations = true
+allow_all_tools = true
+
+[tools]
+Bash = { auto_approve = true }
+Write = { auto_approve = true }
+Edit = { auto_approve = true }
+View = { auto_approve = true }
+WebFetch = { auto_approve = true }
+Replace = { auto_approve = true }

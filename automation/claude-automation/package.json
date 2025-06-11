@@ -1,0 +1,16 @@
+{
+  "name": "claude-automation",
+  "version": "1.0.0",
+  "description": "Claude Automation System with MCP Servers",
+  "type": "module",
+  "scripts": {
+    "start": "./ultimate-launch.sh",
+    "collab": "./setup-collaboration.sh",
+    "dashboard": "open dashboard/index.html",
+    "mcp-server": "node mcp-smart-ops.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "@anthropic-ai/claude-code": "latest"
+  }
+}
