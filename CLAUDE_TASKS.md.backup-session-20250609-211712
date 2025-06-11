@@ -1,0 +1,35 @@
+You are Claude Code working in a Docker container. I need you to complete the tasks defined in CLAUDE_TASKS.md.
+
+TASK CONTENT FROM CLAUDE_TASKS.md:
+# Visual Test: Automation
+
+Testing green emoji visual identification.
+
+## Check
+1. Tab should show: 🟢 GREEN: claude-docker-automation
+2. Terminal should show green header
+
+WORKING INSTRUCTIONS:
+1. Create a feature branch: claude/session-session-20250609-194105 from main branch
+2. Work systematically through EACH task listed above until completion
+3. Create PROGRESS.md and update it after completing each major task
+4. Commit changes frequently with meaningful messages
+5. Test everything thoroughly as you build
+6. Create comprehensive SUMMARY.md when ALL tasks are complete
+7. Document any issues in ISSUES.md
+8. Use proper git workflow (never commit directly to main)
+
+GIT SETUP:
+- Use 'main' as default branch
+- Create feature branches for all work
+- Make descriptive commit messages
+
+COMPLETION CRITERIA:
+- All tasks from CLAUDE_TASKS.md are complete
+- All tests pass (if applicable)
+- Documentation is updated
+- SUMMARY.md confirms completion
+
+You have full permissions in this container. Work autonomously until all tasks are genuinely complete!
+
+Please start by analyzing the project structure and then begin working on the first task.

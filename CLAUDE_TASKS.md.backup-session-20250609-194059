@@ -1,0 +1,7 @@
+# Visual Test: Palladio
+
+Testing purple emoji visual identification.
+
+## Check
+1. Tab should show: 🟪 PURPLE: claude-docker-automation
+2. Terminal should show purple header

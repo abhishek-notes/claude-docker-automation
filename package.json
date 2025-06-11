@@ -1,0 +1,16 @@
+{
+  "name": "hello-response-app",
+  "version": "1.0.0",
+  "description": "Simple application that responds with hello",
+  "main": "hello.js",
+  "scripts": {
+    "start": "node hello.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["hello", "express", "node"],
+  "author": "Claude",
+  "license": "MIT"
+}

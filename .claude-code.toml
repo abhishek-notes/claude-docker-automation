@@ -1,0 +1,66 @@
+# Project Config - DOCKER CONTAINER ONLY (No Host Access)
+
+[workspace]
+root = "/app"  # Docker container root only
+trust_all_operations = false
+restrict_to_container = true
+
+[permissions]
+mode = "restricted"
+auto_approve = true  # Only within container
+skip_confirmation = true  # Only within container
+container_only = true
+
+# CONTAINER-ONLY patterns (no host system access)
+allowed_commands = [
+    "git", "npm", "node", "yarn", "pnpm", 
+    "ls", "cat", "grep", "find", "mkdir", "touch",
+    "cp", "mv", "rm", "chmod", "chown",
+    "python", "pip", "pytest", "jest", "make"
+]
+allowed_paths = ["/app/*", "/tmp/*", "/workspace/*"]
+allowed_domains = []  # No web access from container
+
+# Tool-specific permissions - CONTAINER ONLY
+[permissions.bash]
+auto_approve = true
+patterns = ["/app/*", "/workspace/*", "/tmp/*"]
+commands = [
+    "git", "npm", "node", "yarn", "ls", "cat", "grep",
+    "mkdir", "touch", "cp", "mv", "rm", "chmod"
+]
+# BLOCKED: system commands, host paths, network tools
+
+[permissions.file]
+auto_approve = true
+operations = ["read", "write", "create", "delete"]
+paths = ["/app/*", "/workspace/*", "/tmp/*"]
+# BLOCKED: host filesystem access
+
+[permissions.network]
+auto_approve = false  # NO network access from container
+domains = []  # NO external domains
+
+[automation]
+skip_file_confirmations = true  # Only for container files
+skip_command_confirmations = true  # Only for whitelisted commands
+skip_fetch_confirmations = false  # Network disabled
+container_isolation = true
+
+# Container-only whitelist
+[whitelist]
+commands = [
+    "git", "npm", "node", "yarn", "pnpm",
+    "ls", "cat", "grep", "find", "mkdir", "touch",
+    "cp", "mv", "rm", "chmod", "python", "pip", "pytest"
+]
+paths = ["/app/*", "/workspace/*", "/tmp/*"]
+domains = []  # NO external access
+tools = ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "LS"]
+
+# SECURITY: Explicitly blocked
+[blocked]
+host_access = true
+network_access = true
+system_commands = ["sudo", "su", "systemctl", "service", "mount", "umount"]
+host_paths = ["/Users/*", "/home/*", "/root/*", "/etc/*", "/var/*", "/sys/*"]
