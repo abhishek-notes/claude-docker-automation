@@ -547,6 +547,27 @@
 				const projectName = projectPath.split("/").pop()
 				const timestamp = new Date().toISOString().slice(0, 19)
 
+				// Check if this is a simple response task
+				const simpleResponseKeywords = ['respond with', 'say', 'print', 'output', 'what is', 'calculate', 'hello', 'hi'];
+				const isSimpleResponse = simpleResponseKeywords.some(keyword => 
+					description.toLowerCase().includes(keyword.toLowerCase())
+				);
+
+				// For simple responses, create TEXT_ONLY format
+				if (isSimpleResponse) {
+					// Extract the actual response text
+					let responseText = description;
+					if (description.toLowerCase().includes('respond with')) {
+						responseText = description.replace(/.*respond with\s*/i, '').trim();
+					} else if (description.toLowerCase().includes('say')) {
+						responseText = description.replace(/.*say\s*/i, '').trim();
+					}
+					
+					return `#! TEXT_ONLY
+${responseText}`;
+				}
+
+				// For full implementation tasks, use the complete template
 				return `# Claude Autonomous Task - ${projectName}
 
 ## Project Overview
