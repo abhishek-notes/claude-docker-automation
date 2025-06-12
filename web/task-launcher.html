@@ -618,11 +618,23 @@ ${description}
 ## Working Instructions
 
 ### 🚨 CRITICAL FIRST STEP: UNDERSTAND THE TASK
-Before taking ANY action, analyze what's actually being asked:
-- **Simple response tasks** (e.g., "respond with hello world"): Just output the response, don't create files
-- **Implementation tasks**: Follow the full workflow below
-- **Analysis tasks**: Read and report findings, don't modify unless asked
-- **Fix tasks**: Make only the specific changes requested
+
+**⚠️ DO NOT CREATE FILES FOR SIMPLE RESPONSES!**
+
+Decision Flow:
+\`\`\`
+┌─► Is this a simple response task? (greeting, calculation, one-line answer)
+│   └─► YES → Output the response directly. NO files, NO git, NO branches!
+│   └─► NO → Continue to task classification below
+\`\`\`
+
+**Task Classification Guide:**
+| Task Type | Detection Clues | Actions Allowed |
+|-----------|----------------|-----------------|
+| **Simple Response** | "respond with", "what is", "calculate" | Print answer only - NO files |
+| **Analysis** | "explain", "audit", "review", "diagnose" | Read & report - NO modifications |
+| **Implementation** | "create", "add", "implement", "build" | Full workflow - create files/code |
+| **Fix/Update** | "fix", "update", "refactor", "change" | Modify specific files only |
 
 ### For Implementation Tasks:
 1. 🔍 **Documentation-First Analysis**: Follow Phase 1 & 2 methodology above

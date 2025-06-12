@@ -57,11 +57,24 @@
 ## Working Instructions
 
 ### 🚨 CRITICAL FIRST STEP: UNDERSTAND THE TASK
-Before taking ANY action, analyze what's actually being asked:
-- **Simple response tasks** (e.g., "respond with hello world"): Just output the response, don't create files
-- **Implementation tasks**: Follow the full workflow below
-- **Analysis tasks**: Read and report findings, don't modify unless asked
-- **Fix tasks**: Make only the specific changes requested
+
+**⚠️ DO NOT CREATE FILES FOR SIMPLE RESPONSES!**
+
+Before taking ANY action, follow this decision flow:
+
+```
+┌─► Is this a simple response task? (greeting, calculation, one-line answer)
+│   └─► YES → Output the response directly. DO NOT create files, branches, or commits!
+│   └─► NO → Continue to task classification below
+```
+
+**Task Classification Guide:**
+| Task Type | Detection Clues | Actions Allowed |
+|-----------|----------------|-----------------|
+| **Simple Response** | "respond with", "what is", "calculate" | Print answer only - NO files |
+| **Analysis** | "explain", "audit", "review", "diagnose" | Read & report - NO modifications |
+| **Implementation** | "create", "add", "implement", "build" | Full workflow - create files/code |
+| **Fix/Update** | "fix", "update", "refactor", "change" | Modify specific files only |
 
 ### For Implementation Tasks:
 1. 🔍 **Documentation-First Analysis**: Follow Phase 1 & 2 methodology above
@@ -81,6 +94,7 @@ Before taking ANY action, analyze what's actually being asked:
 - **Progress tracking**: Create in project-specific location (e.g., project/PROGRESS.md)
 - **Logs**: Use existing logging patterns where available
 - **Never**: Create files in workspace root unless explicitly requested
+- **⚠️ Warning**: Never create sibling directories that shadow existing package names (e.g., don't create `api/` if `src/api/` exists)
 
 ## 🎪 Deliverables (Preference-Based, Not Mandatory)
 - **As Needed**: PROGRESS.md in project directory (for complex multi-step tasks)
@@ -107,7 +121,13 @@ Before taking ANY action, analyze what's actually being asked:
 - Username: abhishek-notes
 - Email: abhisheksoni1551@gmail.com
 - Branch: claude/session-[SESSION_ID]
-- Commit style: "feat/fix/docs: Clear description"
+- Commit style: Use Conventional Commits format:
+  - `feat:` New feature
+  - `fix:` Bug fix
+  - `docs:` Documentation only
+  - `refactor:` Code change that neither fixes a bug nor adds a feature
+  - `test:` Adding missing tests
+  - `chore:` Changes to build process or auxiliary tools
 - GitHub Token: Available at /Users/abhishek/Work/config/.env.github (GitHub classic token)
 
 ## 🏆 Success Criteria (Contextual Completion)
@@ -133,5 +153,13 @@ Before taking ANY action, analyze what's actually being asked:
 - Code formatters and linters
 - NO external network calls during development
 - Document all tool usage in logs/llm-interactions.log
+
+## 🛡️ Runtime Safety Rules
+- **Filesystem**: Only modify files under /workspace unless explicitly requested
+- **Dangerous Operations**: Never run `rm -rf /` or destructive commands without explicit permission
+- **Network**: No external API writes or data uploads without explicit authorization
+- **Secrets**: Keep all tokens/keys out of logs and commits
+- **Database**: Prompt user before running migrations or schema changes
+- **Production**: Never touch production systems unless explicitly authorized
 
 **Remember: Safety first, quality always, document everything!**

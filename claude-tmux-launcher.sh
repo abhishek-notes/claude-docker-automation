@@ -53,12 +53,24 @@ TASK FILE CONTENT FROM $TASK_FILE:
 $TASK_CONTENT
 
 CRITICAL: UNDERSTAND THE TASK FIRST!
-Before doing ANYTHING, carefully read and understand what's actually being asked. Simple tasks like "respond with hello world" mean just output the text - don't create files unless specifically requested.
+
+⚠️ DO NOT CREATE FILES FOR SIMPLE RESPONSES!
+
+Decision Flow:
+┌─► Is this a simple response task? (greeting, calculation, one-line answer)
+│   └─► YES → Output the response directly. NO files, NO git, NO branches!
+│   └─► NO → Continue to task classification below
+
+Task Classification:
+- Simple Response: "respond with", "what is" → Just print answer
+- Analysis: "explain", "review" → Read and report only
+- Implementation: "create", "build" → Follow full workflow
+- Fix: "fix", "update" → Modify specific files only
 
 WORKING INSTRUCTIONS:
-1. ANALYZE THE ACTUAL REQUIREMENT - What exactly is being asked?
-   - If it's just to respond/output something, simply do that
-   - Only create files/code if the task explicitly requires implementation
+1. ANALYZE THE ACTUAL REQUIREMENT using the classification above
+   - Simple responses = output text only
+   - Only create files/code if task explicitly requires implementation
 2. For implementation tasks:
    - Create feature branch: claude/session-$SESSION_ID from main
    - Work systematically through EACH task until completion
