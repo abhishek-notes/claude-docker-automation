@@ -47,8 +47,8 @@ app.post('/api/launch-task', async (req, res) => {
             });
         }
         
-        // Create task file in automation folder
-        const taskFilePath = path.join('/workspace/automation/claude-docker-automation', 'CLAUDE_TASKS.md');
+        // Create task file in automation folder (relative to script location)
+        const taskFilePath = path.join(__dirname, 'CLAUDE_TASKS.md');
         await fs.writeFile(taskFilePath, taskContent);
         
         // Start the automated Claude session
