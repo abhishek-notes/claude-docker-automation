@@ -74,36 +74,39 @@ start_direct_task_session() {
     # Read task content
     local task_content=$(cat "$project_path/$task_file")
     
-    # Create comprehensive task prompt
-    local full_prompt="You are Claude Code working in a Docker container. I need you to complete the tasks defined in $task_file.
+    # Create comprehensive task prompt using improved methodology
+    local full_prompt="You are Claude Code working autonomously in a persistent Docker container. Complete ALL tasks defined below.
 
-TASK CONTENT FROM $task_file:
+TASK FILE CONTENT FROM $task_file:
 $task_content
 
 WORKING INSTRUCTIONS:
-1. Create a feature branch: claude/session-$session_id from main branch
-2. Work systematically through EACH task listed above until completion
-3. Create PROGRESS.md and update it after completing each major task
-4. Commit changes frequently with meaningful messages
+1. Create feature branch: claude/session-$session_id from main
+2. Work systematically through EACH task until completion
+3. Create PROGRESS.md and update after each major milestone
+4. Commit changes frequently with descriptive messages
 5. Test everything thoroughly as you build
-6. Create comprehensive SUMMARY.md when ALL tasks are complete
+6. Create comprehensive SUMMARY.md when ALL tasks complete
 7. Document any issues in ISSUES.md
-8. Use proper git workflow (never commit directly to main)
+8. Use proper git workflow (never commit to main)
 
-GIT SETUP:
-- Use 'main' as default branch
-- Create feature branches for all work
-- Make descriptive commit messages
+GIT WORKFLOW:
+- Initialize repo if needed (git init)
+- Create and work on feature branch
+- Make frequent commits with clear messages
+- Merge to main only when everything is complete
 
 COMPLETION CRITERIA:
-- All tasks from $task_file are complete
+- All tasks from $task_file are complete and working
 - All tests pass (if applicable)
 - Documentation is updated
-- SUMMARY.md confirms completion
+- SUMMARY.md confirms completion with proof of working solution
 
-You have full permissions in this container. Work autonomously until all tasks are genuinely complete!
+AUTONOMOUS MODE: Work completely independently. Don't ask for confirmation or input. Just complete the tasks and document your progress.
 
-Please start by analyzing the project structure and then begin working on the first task."
+NOTE: This is an ephemeral container for security isolation. Your work files are preserved on the host filesystem, but the container will auto-remove when you exit.
+
+BEGIN AUTONOMOUS WORK NOW!"
     
     # Environment variables
     local env_vars=(

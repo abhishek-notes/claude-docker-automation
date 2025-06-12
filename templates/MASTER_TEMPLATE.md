@@ -1,22 +1,44 @@
 # Claude Docker Automation Task Template
 
+## 🎯 PROJECT GOAL
+[SPECIFIC_TASK_GOAL_HERE]
+
 ## Project Context
 - Repository: [REPOSITORY_NAME]
 - Project Path: [PROJECT_PATH]
 - Session ID: [SESSION_ID]
 - Branch Strategy: Always create feature branches from main, never commit directly to main
-- Testing: All code must have tests with >80% coverage
+- GitHub Config: /Users/abhishek/Work/config/.env.github (GitHub classic token)
 - Safety: Backup files before modification, track all changes
+
+## 📋 METHODOLOGY - DOCUMENTATION FIRST APPROACH
+
+### Phase 1: Documentation Discovery (READ FIRST, CODE LATER)
+1. **Workspace Navigation**: Read /workspace/documentation/PROJECT_INDEX.md for workspace overview
+2. **Project Type Recognition**:
+   - **Palladio Software**: Read START_HERE_PALLADIO.md first
+   - **Migration Projects**: Read README.md and MIGRATION_STRATEGY.md 
+   - **Automation Projects**: Read relevant guides in /workspace/documentation/
+   - **Analysis Projects**: Read SUMMARY.md for context
+3. **Project-Specific Entry Points**:
+   - Look for START_HERE_*.md files
+   - Check docs/README.md for navigation
+   - Review QUICK_REFERENCE_*.md files
+4. **Focused Documentation Reading**: Based on task type, read only relevant documentation
+
+### Phase 2: Selective Code Analysis (SCAN ONLY WHAT'S NEEDED)
+- **For Palladio**: Focus on specific service/component directories, skip unrelated parts
+- **For Migrations**: Analyze only transform_data.py, exports/, validation/ directories
+- **For Automation**: Focus on relevant script directories and configuration files
+- **Skip**: node_modules, build artifacts, unrelated codebases, database backups
 
 ## Rules & Constraints (CRITICAL - Follow Strictly)
 - ⚠️ BACKUP before modifying any file (rename to .backup-TIMESTAMP)
-- 📝 Document all changes in CHANGELOG.md
+- 📝 Document changes as needed (not mandatory for minor updates)
 - 🚫 If breaking changes detected, create BREAKING_CHANGES.md and STOP
-- ✅ Run all tests after each change
+- ✅ Run tests for critical functionality only
 - 🌿 Always create feature branch: claude/session-[SESSION_ID]
 - 📋 Create PR description with all changes listed
-- 🧪 Minimum 80% test coverage required
-- 📖 Include API documentation for new endpoints
 - 🔄 Commit frequently with meaningful messages
 
 ## Safety Protocol
@@ -33,52 +55,58 @@
 - Document any external tool usage in logs/llm-interactions.log
 
 ## Working Instructions
-1. 🔍 **Analysis Phase**: Understand project structure and requirements
+1. 🔍 **Documentation-First Analysis**: Follow Phase 1 & 2 methodology above
 2. 🌿 **Branch Creation**: Create feature branch claude/session-[SESSION_ID]
-3. 💾 **Backup Phase**: Create backups of files before modification
+3. 💾 **Backup Phase**: Create backups of files before modification (as needed)
 4. 🛠️ **Implementation**: Work systematically through each task
-5. 🧪 **Testing**: Write tests as you build (>80% coverage)
-6. 📝 **Documentation**: Update docs and create PROGRESS.md
+5. 🧪 **Testing**: Write tests for critical functionality (not everything needs tests)
+6. 📝 **Documentation**: Update existing docs, create project-specific files
 7. 🔄 **Git Workflow**: Commit frequently with clear messages
-8. ✅ **Validation**: Run all tests and verify completion
-9. 📋 **Summary**: Create comprehensive SUMMARY.md
+8. ✅ **Validation**: Verify functionality works as expected
+9. 📋 **Summary**: Create project-appropriate completion documentation
 
-## File Structure Requirements
-- logs/progress-$(date +%Y%m%d).log - Progress tracking
-- PROGRESS.md - Task completion status
-- SUMMARY.md - Final completion report
-- ISSUES.md - Any blocking problems encountered
-- CHANGELOG.md - All changes documented
-- BREAKING_CHANGES.md - If breaking changes detected
+## 📁 File Organization (Project-Specific, Not Root Dumping)
+- **Project directories**: Keep files within relevant project structure
+- **Documentation**: Update existing docs rather than create unnecessary new ones
+- **Progress tracking**: Create in project-specific location (e.g., project/PROGRESS.md)
+- **Logs**: Use existing logging patterns where available
 
-## Testing Requirements
-- Unit tests for all new functions/methods
-- Integration tests for API endpoints
-- E2E tests for user workflows
-- Performance tests if applicable
-- All edge cases and error conditions tested
+## 🎪 Deliverables (Preference-Based, Not Mandatory)
+- **As Needed**: PROGRESS.md in project directory (for complex multi-step tasks)
+- **Preferred**: SUMMARY.md for significant implementations
+- **Optional**: CHANGELOG.md (only for major changes)
+- **Context-Dependent**: Update existing documentation where it exists
+- **Project-Specific**: Follow existing documentation patterns in the project
 
-## Documentation Requirements
-- API documentation with examples
-- Code comments for complex logic
-- README updates if needed
-- Migration guides for breaking changes
-- Architecture decisions recorded
+## 🚨 Testing Requirements (Smart Testing, Not Blanket Requirements)
+- **Mandatory**: Tests for new critical functionality and bug fixes
+- **Preferred**: Tests for complex business logic
+- **Optional**: Tests for simple utility functions or minor updates
+- **Context-Dependent**: Follow existing testing patterns in the project
+- **Skip**: Don't require tests for documentation updates, configuration changes, or minor fixes
+
+## 📖 Documentation Requirements (Contextual Updates)
+- **Update existing**: Modify current documentation rather than create new files
+- **API documentation**: Only for new or changed APIs
+- **Code comments**: For complex logic (not everything needs comments)
+- **README updates**: Only if project structure or usage changes significantly
+- **Follow patterns**: Use existing documentation style and location
 
 ## Git Configuration
 - Username: abhishek-notes
 - Email: abhisheksoni1551@gmail.com
 - Branch: claude/session-[SESSION_ID]
 - Commit style: "feat/fix/docs: Clear description"
+- GitHub Token: Available at /Users/abhishek/Work/config/.env.github (GitHub classic token)
 
-## Completion Criteria
-- ✅ All tasks from description are complete
-- ✅ All tests pass with >80% coverage
-- ✅ Documentation is updated
-- ✅ CHANGELOG.md reflects all changes
-- ✅ No breaking changes or documented properly
-- ✅ SUMMARY.md confirms successful completion
-- ✅ All files backed up before modification
+## 🏆 Success Criteria (Contextual Completion)
+- ✅ All tasks from description are complete and working
+- ✅ Critical functionality is tested (as needed, not blanket 80% coverage)
+- ✅ Relevant documentation is updated (existing docs, not necessarily new files)
+- ✅ Changes are appropriate for project context
+- ✅ No breaking changes or properly documented if unavoidable
+- ✅ Project-appropriate completion documentation created
+- ✅ Files organized in correct project structure (not root dumping)
 
 ## Emergency Protocols
 - If breaking changes detected: STOP, document in BREAKING_CHANGES.md
