@@ -22,17 +22,27 @@ log() { echo -e "${GREEN}[$(date '+%H:%M:%S')]${NC} $1"; }
 check_task_file() {
     local project_path="$1"
     local task_file="$2"
-    local full_path="$project_path/$task_file"
     
-    if [ ! -f "$full_path" ]; then
-        echo -e "${RED}Error:${NC} Task file not found: $full_path"
+    # First check in automation/claude-docker-automation folder
+    local automation_task_path="/workspace/automation/claude-docker-automation/$task_file"
+    # Then check in project path
+    local project_task_path="$project_path/$task_file"
+    
+    if [ -f "$automation_task_path" ]; then
+        echo "$automation_task_path"
+        log "✅ Found task file in automation folder: $automation_task_path"
+    elif [ -f "$project_task_path" ]; then
+        echo "$project_task_path"
+        log "✅ Found task file in project folder: $project_task_path"
+    else
+        echo -e "${RED}Error:${NC} Task file not found in either location:"
+        echo "  - $automation_task_path"
+        echo "  - $project_task_path"
         echo ""
-        echo "Please create $task_file with your tasks, or run:"
-        echo "  ./claude-official-restored.sh start $project_path  # For manual session"
+        echo "Please create $task_file in /workspace/automation/claude-docker-automation/"
+        echo "or run: ./claude-official-restored.sh start $project_path  # For manual session"
         exit 1
     fi
-    
-    log "✅ Found task file: $task_file"
 }
 
 # Setup config volume
@@ -56,8 +66,8 @@ start_direct_task_session() {
         exit 1
     fi
     
-    # Check task file
-    check_task_file "$project_path" "$task_file"
+    # Check task file and get its path
+    local task_path=$(check_task_file "$project_path" "$task_file")
     
     # Setup volume
     setup_config_volume
@@ -72,7 +82,7 @@ start_direct_task_session() {
     log "Task file: $task_file"
     
     # Read task content
-    local task_content=$(cat "$project_path/$task_file")
+    local task_content=$(cat "$task_path")
     
     # Create comprehensive task prompt using improved methodology
     local full_prompt="You are Claude Code working autonomously in a persistent Docker container. Complete ALL tasks defined below.
@@ -214,7 +224,7 @@ start_autopaste_session() {
     local project_path="${1:-$(pwd)}"
     local task_file="${2:-CLAUDE_TASKS.md}"
     
-    check_task_file "$project_path" "$task_file"
+    local task_path=$(check_task_file "$project_path" "$task_file")
     setup_config_volume
     
     local project_name=$(basename "$project_path")
@@ -222,7 +232,7 @@ start_autopaste_session() {
     local container_name="${CONTAINER_PREFIX}-${project_name}-${session_id}"
     
     # Read task content
-    local task_content=$(cat "$project_path/$task_file")
+    local task_content=$(cat "$task_path")
     
     # Environment and volumes
     local env_vars=(
@@ -363,6 +373,8 @@ The 'auto' mode attempts to inject the task automatically.
 
 REQUIREMENTS:
     - Task file must exist (CLAUDE_TASKS.md by default)
+      - First checks: /workspace/automation/claude-docker-automation/CLAUDE_TASKS.md
+      - Then checks: project-path/CLAUDE_TASKS.md
     - Docker volume claude-code-config will be created/used
     - Project path must be valid directory
 

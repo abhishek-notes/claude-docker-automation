@@ -57,6 +57,8 @@ chmod +x claude-docker.sh
 
 1. **Docker Container**: Isolated environment with Claude Code pre-installed
 2. **Task File**: Claude reads `CLAUDE_TASKS.md` for work instructions
+   - Primary location: `/workspace/automation/claude-docker-automation/CLAUDE_TASKS.md`
+   - Fallback location: `project-path/CLAUDE_TASKS.md`
 3. **Autonomous Execution**: Claude works with full permissions inside container
 4. **Progress Tracking**: Creates `PROGRESS.md`, `SUMMARY.md`, and `ISSUES.md`
 5. **Git Management**: Automatic branch creation and commit handling
@@ -115,7 +117,7 @@ export GIT_USER_EMAIL="your@email.com"
 
 ### Task File Format
 
-Create a `CLAUDE_TASKS.md` file with your instructions:
+Create a `CLAUDE_TASKS.md` file in `/workspace/automation/claude-docker-automation/` with your instructions:
 
 ```markdown
 # Claude Autonomous Work Session

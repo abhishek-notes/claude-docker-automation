@@ -19,13 +19,26 @@ if [ ! -d "$PROJECT_PATH" ]; then
     exit 1
 fi
 
-if [ ! -f "$PROJECT_PATH/$TASK_FILE" ]; then
-    echo "Error: Task file not found: $PROJECT_PATH/$TASK_FILE"
+# Check task file in both locations
+AUTOMATION_TASK_PATH="/workspace/automation/claude-docker-automation/$TASK_FILE"
+PROJECT_TASK_PATH="$PROJECT_PATH/$TASK_FILE"
+
+if [ -f "$AUTOMATION_TASK_PATH" ]; then
+    TASK_PATH="$AUTOMATION_TASK_PATH"
+    echo "Found task file in automation folder: $TASK_PATH"
+elif [ -f "$PROJECT_TASK_PATH" ]; then
+    TASK_PATH="$PROJECT_TASK_PATH"
+    echo "Found task file in project folder: $TASK_PATH"
+else
+    echo "Error: Task file not found in either location:"
+    echo "  - $AUTOMATION_TASK_PATH"
+    echo "  - $PROJECT_TASK_PATH"
+    echo "Please create $TASK_FILE in /workspace/automation/claude-docker-automation/"
     exit 1
 fi
 
 # Read the task content and create enhanced task file
-TASK_CONTENT=$(cat "$PROJECT_PATH/$TASK_FILE")
+TASK_CONTENT=$(cat "$TASK_PATH")
 
 # Run pre-task safety check and create session
 log_event "INFO" "Starting Claude tmux launcher for: $PROJECT_PATH"
