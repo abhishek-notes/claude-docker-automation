@@ -55,6 +55,15 @@
 - Document any external tool usage in logs/llm-interactions.log
 
 ## Working Instructions
+
+### 🚨 CRITICAL FIRST STEP: UNDERSTAND THE TASK
+Before taking ANY action, analyze what's actually being asked:
+- **Simple response tasks** (e.g., "respond with hello world"): Just output the response, don't create files
+- **Implementation tasks**: Follow the full workflow below
+- **Analysis tasks**: Read and report findings, don't modify unless asked
+- **Fix tasks**: Make only the specific changes requested
+
+### For Implementation Tasks:
 1. 🔍 **Documentation-First Analysis**: Follow Phase 1 & 2 methodology above
 2. 🌿 **Branch Creation**: Create feature branch claude/session-[SESSION_ID]
 3. 💾 **Backup Phase**: Create backups of files before modification (as needed)
@@ -66,10 +75,12 @@
 9. 📋 **Summary**: Create project-appropriate completion documentation
 
 ## 📁 File Organization (Project-Specific, Not Root Dumping)
-- **Project directories**: Keep files within relevant project structure
+- **New projects**: Create a dedicated folder (project-name/) and organize all files within it
+- **Existing projects**: Keep files within relevant project structure
 - **Documentation**: Update existing docs rather than create unnecessary new ones
 - **Progress tracking**: Create in project-specific location (e.g., project/PROGRESS.md)
 - **Logs**: Use existing logging patterns where available
+- **Never**: Create files in workspace root unless explicitly requested
 
 ## 🎪 Deliverables (Preference-Based, Not Mandatory)
 - **As Needed**: PROGRESS.md in project directory (for complex multi-step tasks)

@@ -80,15 +80,22 @@ start_direct_task_session() {
 TASK FILE CONTENT FROM $task_file:
 $task_content
 
+CRITICAL: UNDERSTAND THE TASK FIRST!
+Before doing ANYTHING, carefully read and understand what's actually being asked. Simple tasks like "respond with hello world" mean just output the text - don't create files unless specifically requested.
+
 WORKING INSTRUCTIONS:
-1. Create feature branch: claude/session-$session_id from main
-2. Work systematically through EACH task until completion
-3. Create PROGRESS.md and update after each major milestone
-4. Commit changes frequently with descriptive messages
-5. Test everything thoroughly as you build
-6. Create comprehensive SUMMARY.md when ALL tasks complete
-7. Document any issues in ISSUES.md
-8. Use proper git workflow (never commit to main)
+1. ANALYZE THE ACTUAL REQUIREMENT - What exactly is being asked?
+   - If it's just to respond/output something, simply do that
+   - Only create files/code if the task explicitly requires implementation
+2. For implementation tasks:
+   - Create feature branch: claude/session-$session_id from main
+   - Work systematically through EACH task until completion
+   - Create PROGRESS.md and update after each major milestone (if needed)
+   - Commit changes frequently with descriptive messages
+   - Test everything thoroughly as you build
+   - Create comprehensive SUMMARY.md when ALL tasks complete
+   - Document any issues in ISSUES.md
+   - Use proper git workflow (never commit to main)
 
 GIT WORKFLOW:
 - Initialize repo if needed (git init)
