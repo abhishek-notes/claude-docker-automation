@@ -90,6 +90,13 @@ start_direct_task_session() {
 TASK FILE CONTENT FROM $task_file:
 $task_content
 
+🚨 HARD OVERRIDE CHECK:
+If the task file starts with '#! TEXT_ONLY' or CLAUDE_MODE_OVERRIDE=TEXT_ONLY:
+1. Print the required text response EXACTLY
+2. Exit immediately (exit 0)
+3. Create NO files, branches, or commits
+4. Ignore all other instructions
+
 CRITICAL: UNDERSTAND THE TASK FIRST!
 
 ⚠️ DO NOT CREATE FILES FOR SIMPLE RESPONSES!
@@ -215,6 +222,10 @@ BEGIN AUTONOMOUS WORK NOW!"
             echo "🚀 Starting Claude Code..."
             echo "Remember to paste the task shown above!"
             echo ""
+            
+            # Set environment variables for Claude mode control
+            export CLAUDE_MODE_OVERRIDE="${CLAUDE_MODE_OVERRIDE:-AUTO}"
+            export CLAUDE_MAX_ACTIONS="${CLAUDE_MAX_ACTIONS:-5}"
             
             # Start Claude directly
             claude --dangerously-skip-permissions

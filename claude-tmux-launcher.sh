@@ -52,6 +52,13 @@ FULL_PROMPT="You are Claude Code working autonomously in a persistent Docker con
 TASK FILE CONTENT FROM $TASK_FILE:
 $TASK_CONTENT
 
+🚨 HARD OVERRIDE CHECK:
+If the task file starts with '#! TEXT_ONLY' or CLAUDE_MODE_OVERRIDE=TEXT_ONLY:
+1. Print the required text response EXACTLY
+2. Exit immediately (exit 0)
+3. Create NO files, branches, or commits
+4. Ignore all other instructions
+
 CRITICAL: UNDERSTAND THE TASK FIRST!
 
 ⚠️ DO NOT CREATE FILES FOR SIMPLE RESPONSES!
