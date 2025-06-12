@@ -146,17 +146,43 @@ start_persistent_session() {
     log "🐳 Container: $container_name"
     log "💾 Project Volume: $project_volume"
     
-    # Create the complete automated prompt
+    # Create the complete automated prompt  
     local automated_prompt="You are Claude Code working autonomously in a persistent Docker container. Complete ALL tasks defined below.
 
 TASK FILE CONTENT FROM $task_file:
 $task_content
 
+🚨 HARD OVERRIDE CHECK:
+If the task file starts with '#! TEXT_ONLY' or CLAUDE_MODE_OVERRIDE=TEXT_ONLY:
+1. Print the required text response EXACTLY
+2. Exit immediately (exit 0)
+3. Create NO files, branches, or commits
+4. Ignore all other instructions
+
+CRITICAL: UNDERSTAND THE TASK FIRST!
+
+⚠️ DO NOT CREATE FILES FOR SIMPLE RESPONSES!
+
+Decision Flow:
+┌─► Is this a simple response task? (greeting, calculation, one-line answer)
+│   └─► YES → Output the response directly. NO files, NO git, NO branches!
+│   └─► NO → Continue to task classification below
+
+Task Classification:
+- Simple Response: \"respond with\", \"what is\" → Just print answer
+- Analysis: \"explain\", \"review\" → Read and report only
+- Implementation: \"create\", \"build\" → Follow full workflow
+- Fix: \"fix\", \"update\" → Modify specific files only
+
 WORKING INSTRUCTIONS:
-1. Create feature branch: claude/session-$session_id from main
-2. Work systematically through EACH task until completion
-3. Create PROGRESS.md and update after each major milestone
-4. Commit changes frequently with descriptive messages
+1. ANALYZE THE ACTUAL REQUIREMENT using the classification above
+   - Simple responses = output text only
+   - Only create files/code if task explicitly requires implementation
+2. For implementation tasks:
+   - Create feature branch: claude/session-$session_id from main
+   - Work systematically through EACH task until completion
+   - Create PROGRESS.md and update after each major milestone
+   - Commit changes frequently with descriptive messages
 5. Test everything thoroughly as you build
 6. Create comprehensive SUMMARY.md when ALL tasks complete
 7. Document any issues in ISSUES.md
@@ -189,6 +215,8 @@ BEGIN AUTONOMOUS WORK NOW!"
         -e "AUTOMATED_MODE=true"
         -e "CONTAINER_NAME=$container_name"
         -e "SESSION_ID=$session_id"
+        -e "CLAUDE_MODE_OVERRIDE=${CLAUDE_MODE_OVERRIDE:-AUTO}"
+        -e "CLAUDE_MAX_ACTIONS=${CLAUDE_MAX_ACTIONS:-5}"
     )
     
     if [ -n "${GITHUB_TOKEN:-}" ]; then

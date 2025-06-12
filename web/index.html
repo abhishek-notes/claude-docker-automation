@@ -296,6 +296,7 @@
 							<input
 								type="checkbox"
 								id="useDocker"
+								checked
 								style="
 									margin-right: 8px;
 									width: 16px;
@@ -331,12 +332,37 @@
 						></textarea>
 					</div>
 
-					<div class="form-group" style="margin-top: 15px;">
-						<label style="display: flex; align-items: center; cursor: pointer; max-width: fit-content;">
-							<input type="checkbox" id="openInNewTab" checked style="margin-right: 8px; width: 16px; height: 16px; accent-color: #2a5298;">
-							<span style="font-weight: 500;">📑 Open in New Tab</span>
+					<div class="form-group" style="margin-top: 15px">
+						<label
+							style="
+								display: flex;
+								align-items: center;
+								cursor: pointer;
+								max-width: fit-content;
+							"
+						>
+							<input
+								type="checkbox"
+								id="openInNewTab"
+								checked
+								style="
+									margin-right: 8px;
+									width: 16px;
+									height: 16px;
+									accent-color: #2a5298;
+								"
+							/>
+							<span style="font-weight: 500">📑 Open in New Tab</span>
 						</label>
-						<small style="color: #666; margin-left: 24px; display: block; margin-top: 4px; font-size: 13px;">
+						<small
+							style="
+								color: #666;
+								margin-left: 24px;
+								display: block;
+								margin-top: 4px;
+								font-size: 13px;
+							"
+						>
 							Opens Claude in a new iTerm tab (unchecked: uses existing tab)
 						</small>
 					</div>
@@ -548,23 +574,32 @@
 				const timestamp = new Date().toISOString().slice(0, 19)
 
 				// Check if this is a simple response task
-				const simpleResponseKeywords = ['respond with', 'say', 'print', 'output', 'what is', 'calculate', 'hello', 'hi'];
-				const isSimpleResponse = simpleResponseKeywords.some(keyword => 
+				const simpleResponseKeywords = [
+					"respond with",
+					"say",
+					"print",
+					"output",
+					"what is",
+					"calculate",
+					"hello",
+					"hi",
+				]
+				const isSimpleResponse = simpleResponseKeywords.some((keyword) =>
 					description.toLowerCase().includes(keyword.toLowerCase())
-				);
+				)
 
 				// For simple responses, create TEXT_ONLY format
 				if (isSimpleResponse) {
 					// Extract the actual response text
-					let responseText = description;
-					if (description.toLowerCase().includes('respond with')) {
-						responseText = description.replace(/.*respond with\s*/i, '').trim();
-					} else if (description.toLowerCase().includes('say')) {
-						responseText = description.replace(/.*say\s*/i, '').trim();
+					let responseText = description
+					if (description.toLowerCase().includes("respond with")) {
+						responseText = description.replace(/.*respond with\s*/i, "").trim()
+					} else if (description.toLowerCase().includes("say")) {
+						responseText = description.replace(/.*say\s*/i, "").trim()
 					}
-					
+
 					return `#! TEXT_ONLY
-${responseText}`;
+${responseText}`
 				}
 
 				// For full implementation tasks, use the complete template
