@@ -367,6 +367,40 @@
 						</small>
 					</div>
 
+					<div class="form-group" style="margin-top: 15px">
+						<label
+							style="
+								display: flex;
+								align-items: center;
+								cursor: pointer;
+								max-width: fit-content;
+							"
+						>
+							<input
+								type="checkbox"
+								id="simpleResponseMode"
+								style="
+									margin-right: 8px;
+									width: 16px;
+									height: 16px;
+									accent-color: #2a5298;
+								"
+							/>
+							<span style="font-weight: 500">💬 Simple Response Mode</span>
+						</label>
+						<small
+							style="
+								color: #666;
+								margin-left: 24px;
+								display: block;
+								margin-top: 4px;
+								font-size: 13px;
+							"
+						>
+							For quick responses like greetings or calculations (skips full task workflow)
+						</small>
+					</div>
+
 					<div class="example-tasks">
 						<div class="example-task" onclick="setExampleTask('webapp')">
 							Web App Example
@@ -570,40 +604,44 @@
 			}
 
 			function generateImprovedTask(description, type, projectPath) {
-				const projectName = projectPath.split("/").pop()
-				const timestamp = new Date().toISOString().slice(0, 19)
+                const projectName = projectPath.split("/").pop()
+                const timestamp = new Date().toISOString().slice(0, 19)
+                
+                // Check if user explicitly selected simple response mode
+                const simpleResponseCheckbox = document.getElementById("simpleResponseMode")
+                const userWantsSimpleMode = simpleResponseCheckbox && simpleResponseCheckbox.checked
 
-				// Check if this is a simple response task
-				const simpleResponseKeywords = [
-					"respond with",
-					"say",
-					"print",
-					"output",
-					"what is",
-					"calculate",
-					"hello",
-					"hi",
-				]
-				const isSimpleResponse = simpleResponseKeywords.some((keyword) =>
-					description.toLowerCase().includes(keyword.toLowerCase())
-				)
+                // Check if this is a simple response task
+                // Only trigger TEXT_ONLY mode for very specific patterns OR if user checked the box
+                const simpleResponsePatterns = [
+                    /^respond with\s+/i,
+                    /^say\s+/i,
+                    /^print\s+/i,
+                    /^output\s+/i,
+                    /^what is\s+\d+\s*[\+\-\*\/]\s*\d+/i,  // math calculations
+                    /^calculate\s+\d+/i,
+                    /^(hello|hi)$/i,  // Only if it's JUST hello or hi
+                ]
+                const isSimpleResponse = userWantsSimpleMode || simpleResponsePatterns.some((pattern) =>
+                    pattern.test(description.trim())
+                )
 
-				// For simple responses, create TEXT_ONLY format
-				if (isSimpleResponse) {
-					// Extract the actual response text
-					let responseText = description
-					if (description.toLowerCase().includes("respond with")) {
-						responseText = description.replace(/.*respond with\s*/i, "").trim()
-					} else if (description.toLowerCase().includes("say")) {
-						responseText = description.replace(/.*say\s*/i, "").trim()
-					}
+                // For simple responses, create TEXT_ONLY format
+                if (isSimpleResponse) {
+                    // Extract the actual response text
+                    let responseText = description
+                    if (description.toLowerCase().includes("respond with")) {
+                        responseText = description.replace(/.*respond with\s*/i, "").trim()
+                    } else if (description.toLowerCase().includes("say")) {
+                        responseText = description.replace(/.*say\s*/i, "").trim()
+                    }
 
-					return `#! TEXT_ONLY
+                    return `#! TEXT_ONLY
 ${responseText}`
-				}
+                }
 
-				// For full implementation tasks, use the complete template
-				return `# Claude Autonomous Task - ${projectName}
+                // For full implementation tasks, use the complete template
+                return `# Claude Autonomous Task - ${projectName}
 
 ## Project Overview
 - **Goal**: ${description}
@@ -638,7 +676,7 @@ ${responseText}`
 
 ### 4. Documentation
 - **Description**: Create comprehensive documentation
-- **Requirements**:
+- **Requirements":
   - Update README if needed
   - Add inline code comments
   - Document any new APIs or components
@@ -669,7 +707,7 @@ The task is complete when:
 5. SUMMARY.md confirms successful completion
 
 Start by analyzing the project structure, then implement the features systematically.`
-			}
+            }
 
 			function editImprovedTask() {
 				const improved = document.getElementById(
