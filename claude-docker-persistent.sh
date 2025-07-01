@@ -128,8 +128,18 @@ start_persistent_session() {
     # Get session info
     local project_name=$(basename "$project_path")
     local session_id="$(date +%Y%m%d-%H%M%S)"
-    local task_content=$(cat "$project_path/$task_file")
+    
+    # Read task file from automation directory if called via API, otherwise from project path
+    local task_file_path
+    if [ -f "$(dirname "$0")/$task_file" ]; then
+        task_file_path="$(dirname "$0")/$task_file"
+    else
+        task_file_path="$project_path/$task_file"
+    fi
+    local task_content=$(cat "$task_file_path")
     local keywords=$(extract_keywords "$task_content")
+    
+    log "📋 Reading task file from: $task_file_path"
     # local task_icon=$(get_task_icon "$task_content")  # Removed for now
     
     # Create descriptive container name without emoji for now
@@ -289,7 +299,7 @@ BEGIN AUTONOMOUS WORK NOW!"
             git config --global --add safe.directory /workspace
             
             # GitHub CLI setup
-            if [ -n \"\${GITHUB_TOKEN:-}\" ]; then
+            if [ -n \"${GITHUB_TOKEN:-}\" ]; then
                 echo \"\$GITHUB_TOKEN\" | gh auth login --with-token 2>/dev/null || true
                 echo '✅ GitHub CLI authenticated'
             fi
