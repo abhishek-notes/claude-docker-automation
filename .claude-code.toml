@@ -58,6 +58,13 @@ paths = ["/app/*", "/workspace/*", "/tmp/*"]
 domains = []  # NO external access
 tools = ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "LS"]
 
+# Sound notification hooks
+[hooks]
+Stop = [
+    { matcher = "*", command = "afplay /System/Library/Sounds/Glass.aiff" },
+    { matcher = "*", command = "osascript -e 'display notification \"Claude Code task completed\" sound name \"Glass\"'" }
+]
+
 # SECURITY: Explicitly blocked
 [blocked]
 host_access = true

@@ -129,13 +129,8 @@ start_persistent_session() {
     local project_name=$(basename "$project_path")
     local session_id="$(date +%Y%m%d-%H%M%S)"
     
-    # Read task file from automation directory if called via API, otherwise from project path
-    local task_file_path
-    if [ -f "$(dirname "$0")/$task_file" ]; then
-        task_file_path="$(dirname "$0")/$task_file"
-    else
-        task_file_path="$project_path/$task_file"
-    fi
+    # Read task file from project directory only
+    local task_file_path="$project_path/$task_file"
     local task_content=$(cat "$task_file_path")
     local keywords=$(extract_keywords "$task_content")
     

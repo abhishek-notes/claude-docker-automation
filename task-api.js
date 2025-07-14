@@ -47,12 +47,12 @@ app.post('/api/launch-task', async (req, res) => {
             });
         }
         
-        // Create task file in automation folder (relative to script location)
-        const taskFilePath = path.join(__dirname, 'CLAUDE_TASKS.md');
+        // Create task file in the project directory specified by user
+        const taskFilePath = path.join(projectPath, 'CLAUDE_TASKS.md');
         await fs.writeFile(taskFilePath, taskContent);
         
         // Start the automated Claude session
-        const session = await launchClaudeSession(projectPath, sessionId, itermProfile, useDocker, openInNewTab);
+        const session = await launchClaudeSession(projectPath, taskContent, sessionId, itermProfile, useDocker, openInNewTab);
         
         // Store session
         activeSessions.set(sessionId, session);
@@ -193,7 +193,7 @@ function extractKeywords(taskContent) {
 }
 
 // Launch Claude session
-async function launchClaudeSession(projectPath, sessionId, itermProfile = 'Default', useDocker = false, openInNewTab = true) {
+async function launchClaudeSession(projectPath, taskContent, sessionId, itermProfile = 'Default', useDocker = false, openInNewTab = true) {
     return new Promise((resolve, reject) => {
         const session = {
             sessionId: sessionId,

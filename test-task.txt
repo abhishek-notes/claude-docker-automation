@@ -1,0 +1,3 @@
+Simple test task to verify auto-pasting is working.
+
+Please respond with: "Auto-paste is working correctly!"
