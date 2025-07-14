@@ -49,6 +49,19 @@ case "${1:-help}" in
     "periodic"|"p")
         "$SCRIPT_DIR/start-periodic-backup.sh" "${2:-status}"
         ;;
+    "rename"|"rn")
+        "$SCRIPT_DIR/conversation-renamer.sh" rename
+        ;;
+    "named"|"n")
+        "$SCRIPT_DIR/conversation-renamer.sh" list
+        ;;
+    "search-named"|"sn")
+        if [ -z "${2:-}" ]; then
+            echo "Usage: $0 search-named <search-term>"
+            exit 1
+        fi
+        "$SCRIPT_DIR/conversation-renamer.sh" search "$2"
+        ;;
     "help"|"h")
         cat << 'EOF'
 Claude Conversation Backup Aliases
@@ -60,11 +73,14 @@ COMMANDS:
     backup, b               Backup all conversations
     status, s               Show backup status
     restore, r <id>         Restore conversation by ID
-    list, l                 List recent conversations
+    list, l                 List recent conversations (UUID format)
     find, f <term>          Search conversations for term
     monitor, m [cmd]        Manage real-time monitoring (start/stop/status)
     realtime, rt            Manual real-time backup (run while working)
     periodic, p [cmd]       Periodic backup every 30s (start/stop/status)
+    rename, rn              Create meaningful names for all conversations  
+    named, n                List conversations with meaningful names
+    search-named, sn <term> Search conversations with meaningful names
     help, h                 Show this help
 
 EXAMPLES:
@@ -72,7 +88,10 @@ EXAMPLES:
     ./claude-backup-alias.sh status         # Show status
     ./claude-backup-alias.sh realtime       # Backup current conversation now
     ./claude-backup-alias.sh periodic start # Start 30s periodic backup
-    ./claude-backup-alias.sh find "dashboard"    # Find conversations about dashboard
+    ./claude-backup-alias.sh rename         # Create readable names for conversations
+    ./claude-backup-alias.sh named          # Show conversations with readable names
+    ./claude-backup-alias.sh search-named "icici"    # Find ICICI conversations
+    ./claude-backup-alias.sh search-named "dashboard" # Find dashboard conversations
 EOF
         ;;
     *)
