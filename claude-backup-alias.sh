@@ -62,6 +62,33 @@ case "${1:-help}" in
         fi
         "$SCRIPT_DIR/conversation-renamer.sh" search "$2"
         ;;
+    "work"|"w")
+        if [ -d "/Users/abhishek/Work/claude-conversations" ]; then
+            echo "📁 Work Conversations Directory:"
+            echo "   /Users/abhishek/Work/claude-conversations/"
+            echo ""
+            echo "📊 Summary:"
+            echo "   💾 Total: $(ls "/Users/abhishek/Work/claude-conversations/conversations"/*.jsonl 2>/dev/null | wc -l | tr -d ' ') conversations"
+            for topic in trading development salesforce wordpress infrastructure data-analysis general; do
+                count=$(ls "/Users/abhishek/Work/claude-conversations/by-topic/$topic"/*.jsonl 2>/dev/null | wc -l | tr -d ' ')
+                if [ "$count" -gt 0 ]; then
+                    echo "   • $topic: $count conversations"
+                fi
+            done
+            echo ""
+            echo "💡 To access in Claude: 'Claude, read claude-conversations/conversations/FILENAME.jsonl'"
+        else
+            echo "⚠️  Work conversations not set up yet. Run: ./manual-realtime-backup.sh"
+        fi
+        ;;
+    "claude-guide"|"guide")
+        if [ -f "/Users/abhishek/Work/claude-conversations/HOW_TO_USE_WITH_CLAUDE.md" ]; then
+            echo "📚 Opening Claude usage guide..."
+            open "/Users/abhishek/Work/claude-conversations/HOW_TO_USE_WITH_CLAUDE.md"
+        else
+            echo "⚠️  Guide not found. Run backup first to create it."
+        fi
+        ;;
     "help"|"h")
         cat << 'EOF'
 Claude Conversation Backup Aliases
@@ -81,6 +108,8 @@ COMMANDS:
     rename, rn              Create meaningful names for all conversations  
     named, n                List conversations with meaningful names
     search-named, sn <term> Search conversations with meaningful names
+    work, w                 Show Work directory conversations (for Claude access)
+    claude-guide, guide     Open guide for using conversations in Claude
     help, h                 Show this help
 
 EXAMPLES:
@@ -91,7 +120,8 @@ EXAMPLES:
     ./claude-backup-alias.sh rename         # Create readable names for conversations
     ./claude-backup-alias.sh named          # Show conversations with readable names
     ./claude-backup-alias.sh search-named "icici"    # Find ICICI conversations
-    ./claude-backup-alias.sh search-named "dashboard" # Find dashboard conversations
+    ./claude-backup-alias.sh work           # Show Work directory status for Claude access
+    ./claude-backup-alias.sh claude-guide   # Open guide for using conversations in Claude
 EOF
         ;;
     *)
