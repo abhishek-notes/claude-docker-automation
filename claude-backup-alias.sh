@@ -40,6 +40,9 @@ case "${1:-help}" in
             echo "  Found in: $session_id"
         done || echo "No matches found"
         ;;
+    "monitor"|"m")
+        "$SCRIPT_DIR/conversation-monitor.sh" "${2:-status}"
+        ;;
     "help"|"h")
         cat << 'EOF'
 Claude Conversation Backup Aliases
@@ -53,6 +56,7 @@ COMMANDS:
     restore, r <id>         Restore conversation by ID
     list, l                 List recent conversations
     find, f <term>          Search conversations for term
+    monitor, m [cmd]        Manage real-time monitoring (start/stop/status)
     help, h                 Show this help
 
 EXAMPLES:
@@ -60,6 +64,8 @@ EXAMPLES:
     ./claude-backup-alias.sh status         # Show status
     ./claude-backup-alias.sh list           # List recent conversations
     ./claude-backup-alias.sh find "dashboard"    # Find conversations about dashboard
+    ./claude-backup-alias.sh monitor start  # Start real-time monitoring
+    ./claude-backup-alias.sh monitor status # Check monitoring status
 EOF
         ;;
     *)

@@ -376,6 +376,14 @@ AUTO_TASK_EOF
             }
         fi
         
+        # Start real-time conversation monitoring for crash protection
+        if [ -f "$SCRIPT_DIR/conversation-monitor.sh" ]; then
+            log "🎯 Starting real-time conversation monitoring..."
+            "$SCRIPT_DIR/conversation-monitor.sh" start >/dev/null 2>&1 || {
+                warn "Real-time monitoring failed to start (continuing anyway)"
+            }
+        fi
+        
     else
         echo -e "${RED}Error:${NC} Container failed to start"
         docker logs "$container_name" 2>&1 | tail -20
@@ -433,6 +441,12 @@ stop_container() {
     if docker ps | grep -q "$container_name"; then
         log "🛑 Stopping container: $container_name"
         
+        # Stop real-time monitoring first
+        if [ -f "$SCRIPT_DIR/conversation-monitor.sh" ]; then
+            log "🛑 Stopping real-time monitoring..."
+            "$SCRIPT_DIR/conversation-monitor.sh" stop >/dev/null 2>&1 || true
+        fi
+        
         # Backup conversations before stopping
         if [ -f "$SCRIPT_DIR/conversation-backup.sh" ]; then
             log "💾 Backing up conversations before stop..."
@@ -452,6 +466,16 @@ backup_conversations() {
         "$SCRIPT_DIR/conversation-backup.sh" "$@"
     else
         echo -e "${RED}Error:${NC} Conversation backup script not found"
+        exit 1
+    fi
+}
+
+# Manage real-time monitoring
+manage_monitor() {
+    if [ -f "$SCRIPT_DIR/conversation-monitor.sh" ]; then
+        "$SCRIPT_DIR/conversation-monitor.sh" "$@"
+    else
+        echo -e "${RED}Error:${NC} Conversation monitor script not found"
         exit 1
     fi
 }
@@ -621,6 +645,7 @@ COMMANDS:
     attach                              Attach to last container
     stop [container-name]               Stop container with conversation backup
     backup [backup-command]             Manage conversation backups
+    monitor [monitor-command]           Manage real-time conversation monitoring
     help                                Show this help
 
 FEATURES:
@@ -638,6 +663,7 @@ EXAMPLES:
     ./claude-docker-persistent.sh attach                   # Attach to last
     ./claude-docker-persistent.sh stop                     # Stop with backup
     ./claude-docker-persistent.sh backup status            # Check backup status
+    ./claude-docker-persistent.sh monitor status           # Check real-time monitoring
 
 CONTAINER NAMING:
     Containers are named: claude-task-[keywords]-[timestamp]
@@ -662,6 +688,10 @@ case "${1:-start}" in
     "backup")
         shift
         backup_conversations "$@"
+        ;;
+    "monitor")
+        shift
+        manage_monitor "$@"
         ;;
     "help"|"-h"|"--help")
         show_help
