@@ -368,6 +368,14 @@ AUTO_TASK_EOF
         # Auto-launch terminal to connect to the container
         launch_terminal_connection "$container_name" "$automated_prompt"
         
+        # Backup conversations after successful container start
+        if [ -f "$SCRIPT_DIR/conversation-backup.sh" ]; then
+            log "💾 Backing up conversations..."
+            "$SCRIPT_DIR/conversation-backup.sh" backup >/dev/null 2>&1 || {
+                warn "Conversation backup failed (continuing anyway)"
+            }
+        fi
+        
     else
         echo -e "${RED}Error:${NC} Container failed to start"
         docker logs "$container_name" 2>&1 | tail -20
@@ -406,6 +414,45 @@ attach_last() {
         fi
     else
         echo -e "${RED}Error:${NC} No recent container found"
+    fi
+}
+
+# Stop container with backup
+stop_container() {
+    local container_name="${1:-}"
+    
+    if [ -z "$container_name" ]; then
+        if [ -f "$HOME/.claude-last-container" ]; then
+            container_name=$(cat "$HOME/.claude-last-container")
+        else
+            echo -e "${RED}Error:${NC} No container specified and no recent container found"
+            exit 1
+        fi
+    fi
+    
+    if docker ps | grep -q "$container_name"; then
+        log "🛑 Stopping container: $container_name"
+        
+        # Backup conversations before stopping
+        if [ -f "$SCRIPT_DIR/conversation-backup.sh" ]; then
+            log "💾 Backing up conversations before stop..."
+            "$SCRIPT_DIR/conversation-backup.sh" backup
+        fi
+        
+        docker stop "$container_name"
+        log "✅ Container stopped and conversations backed up"
+    else
+        echo -e "${RED}Error:${NC} Container $container_name is not running"
+    fi
+}
+
+# Backup conversations manually
+backup_conversations() {
+    if [ -f "$SCRIPT_DIR/conversation-backup.sh" ]; then
+        "$SCRIPT_DIR/conversation-backup.sh" "$@"
+    else
+        echo -e "${RED}Error:${NC} Conversation backup script not found"
+        exit 1
     fi
 }
 
@@ -572,6 +619,8 @@ COMMANDS:
     start [project-path] [task-file]    Start new persistent container
     list                                List all Claude containers
     attach                              Attach to last container
+    stop [container-name]               Stop container with conversation backup
+    backup [backup-command]             Manage conversation backups
     help                                Show this help
 
 FEATURES:
@@ -587,6 +636,8 @@ EXAMPLES:
     ./claude-docker-persistent.sh start /path/to/project   # Specific project
     ./claude-docker-persistent.sh list                     # List containers
     ./claude-docker-persistent.sh attach                   # Attach to last
+    ./claude-docker-persistent.sh stop                     # Stop with backup
+    ./claude-docker-persistent.sh backup status            # Check backup status
 
 CONTAINER NAMING:
     Containers are named: claude-task-[keywords]-[timestamp]
@@ -604,6 +655,13 @@ case "${1:-start}" in
         ;;
     "attach")
         attach_last
+        ;;
+    "stop")
+        stop_container "${2:-}"
+        ;;
+    "backup")
+        shift
+        backup_conversations "$@"
         ;;
     "help"|"-h"|"--help")
         show_help
