@@ -43,6 +43,12 @@ case "${1:-help}" in
     "monitor"|"m")
         "$SCRIPT_DIR/conversation-monitor.sh" "${2:-status}"
         ;;
+    "realtime"|"rt")
+        "$SCRIPT_DIR/manual-realtime-backup.sh"
+        ;;
+    "periodic"|"p")
+        "$SCRIPT_DIR/start-periodic-backup.sh" "${2:-status}"
+        ;;
     "help"|"h")
         cat << 'EOF'
 Claude Conversation Backup Aliases
@@ -57,15 +63,16 @@ COMMANDS:
     list, l                 List recent conversations
     find, f <term>          Search conversations for term
     monitor, m [cmd]        Manage real-time monitoring (start/stop/status)
+    realtime, rt            Manual real-time backup (run while working)
+    periodic, p [cmd]       Periodic backup every 30s (start/stop/status)
     help, h                 Show this help
 
 EXAMPLES:
     ./claude-backup-alias.sh backup         # Backup all conversations
     ./claude-backup-alias.sh status         # Show status
-    ./claude-backup-alias.sh list           # List recent conversations
+    ./claude-backup-alias.sh realtime       # Backup current conversation now
+    ./claude-backup-alias.sh periodic start # Start 30s periodic backup
     ./claude-backup-alias.sh find "dashboard"    # Find conversations about dashboard
-    ./claude-backup-alias.sh monitor start  # Start real-time monitoring
-    ./claude-backup-alias.sh monitor status # Check monitoring status
 EOF
         ;;
     *)

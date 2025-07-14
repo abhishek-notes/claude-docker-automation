@@ -83,6 +83,46 @@ chmod +x claude-docker.sh
 - No permanent storage of secrets in container
 - Optional credential forwarding
 
+## 💾 Conversation Backup & Crash Protection
+
+### Real-Time Backup System
+- **Automatic conversation backup** every 30 seconds while working
+- **Mac crash protection** - conversations saved even if system freezes
+- **Multiple backup locations** - Regular + Real-time + Emergency recovery
+- **Works from any directory** - `/Work/`, `/bank-nifty/`, any project location
+
+### Quick Backup Commands
+```bash
+# Start real-time protection (30s intervals)
+./claude-backup-alias.sh periodic start
+
+# Manual backup current conversation
+./claude-backup-alias.sh realtime
+
+# Check protection status
+./claude-backup-alias.sh periodic status
+
+# Find your conversations
+./claude-backup-alias.sh find "dashboard"
+./claude-backup-alias.sh find "icici"
+```
+
+### After Mac Crash Recovery
+```bash
+# 1. Restart Mac, start Docker Desktop
+# 2. Run automatic recovery
+./crash-recovery-guide.sh recover
+
+# 3. Find and restore your work
+./claude-backup-alias.sh list
+./claude-backup-alias.sh restore <session-id>
+```
+
+### Backup Locations
+- **Real-time**: `~/.claude-docker-conversations/realtime/` (updated every 30s)
+- **Regular**: `~/.claude-docker-conversations/conversations/` (full backups)
+- **Emergency**: Desktop exports available via `./crash-recovery-guide.sh export`
+
 ## 📁 Project Structure
 
 After running a session, your project will have:
